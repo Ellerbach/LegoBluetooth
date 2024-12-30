@@ -57,7 +57,6 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid data array. Must contain at least 5 bytes.", nameof(data));
             }
 
-            var commonHeader = CommonMessageHeader.Decode(data);
             byte portID = data[3];
             PortInputFormatSetupSubCommand subCommand = (PortInputFormatSetupSubCommand)data[4];
 
@@ -72,16 +71,16 @@ namespace LegoBluetooth
                 byte[] modeDataSetCombinations = new byte[data.Length - 6];
                 Array.Copy(data, 6, modeDataSetCombinations, 0, modeDataSetCombinations.Length);
 
-                return new PortInputFormatSetupCombinedModeMessage(commonHeader.Length, commonHeader.HubID, portID, subCommand, combinationIndex, modeDataSetCombinations)
+                return new PortInputFormatSetupCombinedModeMessage((ushort)data.Length, data[1], portID, subCommand, combinationIndex, modeDataSetCombinations)
                 {
-                    Message = commonHeader.Message,
+                    Message = data,
                 };
             }
             else
             {
-                return new PortInputFormatSetupCombinedModeMessage(commonHeader.Length, commonHeader.HubID, portID, subCommand, 0, null)
+                return new PortInputFormatSetupCombinedModeMessage((ushort)data.Length, data[1], portID, subCommand, 0, null)
                 {
-                    Message = commonHeader.Message,
+                    Message = data,
                 };
             }
         }
@@ -90,7 +89,7 @@ namespace LegoBluetooth
         /// Serializes the PortInputFormatSetupCombinedModeMessage to a byte array.
         /// </summary>
         /// <returns>A byte array representing the PortInputFormatSetupCombinedModeMessage.</returns>
-        public byte[] ToByteArray()
+        public override byte[] ToByteArray()
         {
             byte[] data;
             int index = 0;

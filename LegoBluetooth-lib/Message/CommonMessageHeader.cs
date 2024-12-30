@@ -82,13 +82,66 @@ namespace LegoBluetooth
             }
 
             byte hubID = data[index];
-            byte messageType = data[index + 1];
+            MessageType messageType = (MessageType)data[index + 1];
 
-            return new CommonMessageHeader(length, hubID, (MessageType)messageType)
+            switch (messageType)
             {
-                Message = data,
-            };
+                case MessageType.HubProperties:
+                    return HubPropertyMessage.Decode(data);
+                case MessageType.HubActions:
+                    return HubActionMessage.Decode(data);
+                case MessageType.HubAlerts:
+                    return HubAlertMessage.Decode(data);
+                case MessageType.HubAttachedIO:
+                    return HubAttachedIOMessage.Decode(data);
+                case MessageType.GenericErrorMessages:
+                    return ErrorMessage.Decode(data);
+                case MessageType.HWNetworkCommands:
+                    return HWNetworkMessage.Decode(data);
+                case MessageType.FWUpdateGoIntoBootMode:
+                    return GoIntoBootModeMessage.Decode(data);
+                case MessageType.PortInformationRequest:
+                    return PortInformationRequestMessage.Decode(data);
+                case MessageType.PortModeInformationRequest:
+                    return PortModeInformationRequestMessage.Decode(data);
+                case MessageType.PortInputFormatSetupSingle:
+                    return PortInputFormatSetupSingleMessage.Decode(data);
+                case MessageType.PortInputFormatSetupCombinedMode:
+                    return PortInputFormatSetupCombinedModeMessage.Decode(data);
+                case MessageType.PortInformation:
+                    return PortInformationMessage.Decode(data);
+                case MessageType.PortModeInformation:
+                    return PortModeInformationMessage.Decode(data);
+                case MessageType.PortValueSingle:
+                    return PortValueSingleMessage.Decode(data);
+                case MessageType.PortValueCombinedMode:
+                    return PortValueCombinedModeMessage.Decode(data);
+                case MessageType.PortInputFormatSingle:
+                    return PortInputFormatSingleMessage.Decode(data);
+                case MessageType.PortInputFormatCombinedMode:
+                    return PortInputFormatCombinedModeMessage.Decode(data);
+                case MessageType.VirtualPortSetup:
+                    return VirtualPortSetupMessage.Decode(data);
+                case MessageType.PortOutputCommand:
+                    return PortOutputCommandMessage.Decode(data);
+                case MessageType.PortOutputCommandFeedback:
+                    return PortOutputCommandFeedbackMessage.Decode(data);
+                case MessageType.FWUpdateLockStatusRequest:
+                case MessageType.FWUpdateLockMemory:
+                case MessageType.FWLockStatus:
+                default:
+                    return new CommonMessageHeader(length, hubID, (MessageType)messageType)
+                    {
+                        Message = data,
+                    };
+            }
         }
+
+        /// <summary>
+        /// Serialize as a byte array.
+        /// </summary>
+        /// <returns>A byte array.</returns>
+        public virtual byte[] ToByteArray() => Message;
 
         /// <summary>
         /// Provides a string representation of the common message header.

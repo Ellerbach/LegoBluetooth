@@ -57,16 +57,15 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid data array. Must contain at least 6 bytes.", nameof(data));
             }
 
-            var commonHeader = CommonMessageHeader.Decode(data);
             byte portID = data[3];
             StartupCompletionInfo startupCompletion = (StartupCompletionInfo)data[4];
             SubCommandType subCommand = (SubCommandType)data[5];
             byte[] payload = new byte[data.Length - 6];
             Array.Copy(data, 6, payload, 0, payload.Length);
 
-            return new PortOutputCommandMessage(commonHeader.Length, commonHeader.HubID, portID, startupCompletion, subCommand, payload)
+            return new PortOutputCommandMessage((ushort)data.Length, data[1], portID, startupCompletion, subCommand, payload)
             {
-                Message = commonHeader.Message,
+                Message = data,
             };
         }
 
@@ -74,7 +73,7 @@ namespace LegoBluetooth
         /// Serializes the PortOutputCommandMessage to a byte array.
         /// </summary>
         /// <returns>A byte array representing the PortOutputCommandMessage.</returns>
-        public byte[] ToByteArray()
+        public override byte[] ToByteArray()
         {
             byte[] data;
             int index = 0;

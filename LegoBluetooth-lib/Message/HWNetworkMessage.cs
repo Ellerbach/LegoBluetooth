@@ -43,13 +43,12 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid data array. Must contain at least 5 bytes.", nameof(data));
             }
 
-            var commonHeader = CommonMessageHeader.Decode(data);
             HWNetworkCommandType commandType = (HWNetworkCommandType)data[3];
             byte payload = data[4];
 
-            return new HWNetworkMessage(commonHeader.Length, commonHeader.HubID,  commandType, payload)
+            return new HWNetworkMessage((ushort)data.Length, data[1], commandType, payload)
             {
-                Message = commonHeader.Message,
+                Message = data,
             };
         }
 
@@ -57,7 +56,7 @@ namespace LegoBluetooth
         /// Serializes the HubPropertyMessage to a byte array.
         /// </summary>
         /// <returns>A byte array representing the HubPropertyMessage.</returns>
-        public byte[] ToByteArray()
+        public override byte[] ToByteArray()
         {
             byte[] data;
             int index = 0;

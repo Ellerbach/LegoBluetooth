@@ -57,15 +57,14 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid data array. Must contain at least 10 bytes.", nameof(data));
             }
 
-            var commonHeader = CommonMessageHeader.Decode(data);
             byte portID = data[3];
             byte mode = data[4];
             uint deltaInterval = BitConverter.ToUInt32(data, 5);
             bool notificationEnabled = data[9] == 1;
 
-            return new PortInputFormatSetupSingleMessage(commonHeader.Length, commonHeader.HubID, portID, mode, deltaInterval, notificationEnabled)
+            return new PortInputFormatSetupSingleMessage((ushort)data.Length, data[1], portID, mode, deltaInterval, notificationEnabled)
             {
-                Message = commonHeader.Message,
+                Message = data,
             };
         }
 
@@ -73,7 +72,7 @@ namespace LegoBluetooth
         /// Serializes the PortInputFormatSetupSingleMessage to a byte array.
         /// </summary>
         /// <returns>A byte array representing the PortInputFormatSetupSingleMessage.</returns>
-        public byte[] ToByteArray()
+        public override byte[] ToByteArray()
         {
             byte[] data;
             int index = 0;

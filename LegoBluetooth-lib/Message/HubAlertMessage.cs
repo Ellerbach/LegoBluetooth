@@ -59,14 +59,18 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid data array. Must contain at least 5 bytes.", nameof(data));
             }
 
-            var commonHeader = CommonMessageHeader.Decode(data);
             HubAlertType alertType = (HubAlertType)data[3];
             HubAlertOperation alertOperation = (HubAlertOperation)data[4];
-            HubAlertPayload alertPayload = (HubAlertPayload)data[5];
-
-            return new HubAlertMessage(commonHeader.Length, commonHeader.HubID, alertType, alertOperation, alertPayload)
+            // In theory, we don't have any alert downstream.
+            HubAlertPayload alertPayload = HubAlertPayload.StatusOK;
+            if (data.Length > 5)
             {
-                Message = commonHeader.Message,
+                alertPayload = (HubAlertPayload)data[5];
+            }            
+
+            return new HubAlertMessage((ushort)data.Length, data[1], alertType, alertOperation, alertPayload)
+            {
+                Message = data,
             };
         }
 
@@ -74,7 +78,7 @@ namespace LegoBluetooth
         /// Serializes the HubAlertMessage to a byte array.
         /// </summary>
         /// <returns>A byte array representing the HubAlertMessage.</returns>
-        public byte[] ToByteArray()
+        public override byte[] ToByteArray()
         {
             byte[] data;
             int index = 0;

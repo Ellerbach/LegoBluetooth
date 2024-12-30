@@ -78,7 +78,6 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid data array. Must contain at least 11 bytes.", nameof(data));
             }
 
-            var commonHeader = CommonMessageHeader.Decode(data);
             byte portID = data[3];
             InformationType informationType = (InformationType)data[4];
 
@@ -89,9 +88,9 @@ namespace LegoBluetooth
                 ushort inputModes = BitConverter.ToUInt16(data, 7);
                 ushort outputModes = BitConverter.ToUInt16(data, 9);
 
-                return new PortInformationMessage(commonHeader.Length, commonHeader.HubID, portID, informationType, capabilities, totalModeCount, inputModes, outputModes, null)
+                return new PortInformationMessage((ushort)data.Length, data[1], portID, informationType, capabilities, totalModeCount, inputModes, outputModes, null)
                 {
-                    Message = commonHeader.Message,
+                    Message = data,
                 };
             }
             else if (informationType == InformationType.PossibleModeCombinations)
@@ -103,9 +102,9 @@ namespace LegoBluetooth
                     modeCombinations[i] = BitConverter.ToUInt16(data, 5 + i * 2);
                 }
 
-                return new PortInformationMessage(commonHeader.Length, commonHeader.HubID, portID, informationType, 0, 0, 0, 0, modeCombinations)
+                return new PortInformationMessage((ushort)data.Length, data[1], portID, informationType, 0, 0, 0, 0, modeCombinations)
                 {
-                    Message = commonHeader.Message,
+                    Message = data,
                 };
             }
             else
@@ -118,7 +117,7 @@ namespace LegoBluetooth
         /// Serializes the PortInformationMessage to a byte array.
         /// </summary>
         /// <returns>A byte array representing the PortInformationMessage.</returns>
-        public byte[] ToByteArray()
+        public override byte[] ToByteArray()
         {
             byte[] data;
             int index = 0;

@@ -85,13 +85,12 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid data array. Must contain at least 5 bytes.", nameof(data));
             }
 
-            var commonHeader = CommonMessageHeader.Decode(data);
             byte portID = data[3];
             IOEvent @event = (IOEvent)data[4];
 
             if (@event == IOEvent.DetachedIO)
             {
-                return new HubAttachedIOMessage(commonHeader.Length, commonHeader.HubID, portID, @event, 0, 0, 0, 0, 0);
+                return new HubAttachedIOMessage((ushort)data.Length, data[1], portID, @event, 0, 0, 0, 0, 0);
             }
             else if (@event == IOEvent.AttachedIO)
             {
@@ -104,7 +103,7 @@ namespace LegoBluetooth
                 int hardwareRevision = BitConverter.ToInt32(data, 7);
                 int softwareRevision = BitConverter.ToInt32(data, 11);
 
-                return new HubAttachedIOMessage(commonHeader.Length, commonHeader.HubID, portID, @event, ioTypeID, hardwareRevision, softwareRevision, 0, 0);
+                return new HubAttachedIOMessage((ushort)data.Length, data[1], portID, @event, ioTypeID, hardwareRevision, softwareRevision, 0, 0);
             }
             else if (@event == IOEvent.AttachedVirtualIO)
             {
@@ -117,7 +116,7 @@ namespace LegoBluetooth
                 byte portIDA = data[7];
                 byte portIDB = data[8];
 
-                return new HubAttachedIOMessage(commonHeader.Length, commonHeader.HubID, portID, @event, ioTypeID, 0, 0, portIDA, portIDB);
+                return new HubAttachedIOMessage((ushort)data.Length, data[1], portID, @event, ioTypeID, 0, 0, portIDA, portIDB);
             }
             else
             {
@@ -129,7 +128,7 @@ namespace LegoBluetooth
         /// Serializes the HubAttachedIOMessage to a byte array.
         /// </summary>
         /// <returns>A byte array representing the HubAttachedIOMessage.</returns>
-        public byte[] ToByteArray()
+        public override byte[] ToByteArray()
         {
             byte[] data;
             int index = 0;

@@ -39,12 +39,11 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid data array. Must contain at least 4 bytes.", nameof(data));
             }
 
-            var commonHeader = CommonMessageHeader.Decode(data);
             byte actionType = data[3];
 
-            return new HubActionMessage(commonHeader.Length, commonHeader.HubID, actionType)
+            return new HubActionMessage((ushort)data.Length, data[1], actionType)
             {
-                Message = commonHeader.Message,
+                Message = data,
             };
         }
 
@@ -52,7 +51,7 @@ namespace LegoBluetooth
         /// Serializes the HubActionMessage to a byte array.
         /// </summary>
         /// <returns>A byte array representing the HubActionMessage.</returns>
-        public byte[] ToByteArray()
+        public override byte[] ToByteArray()
         {
             byte[] data;
             int index = 0;

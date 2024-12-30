@@ -34,8 +34,7 @@ namespace LegoBluetooth
             {
                 throw new ArgumentException("Invalid data array. Must contain at least 12 bytes.", nameof(data));
             }
-
-            var commonHeader = CommonMessageHeader.Decode(data);
+           
             string safetyString = Encoding.UTF8.GetString(data, 3, 9);
 
             if (safetyString != SafetyString)
@@ -43,9 +42,9 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid safety string.", nameof(data));
             }
 
-            return new GoIntoBootModeMessage(commonHeader.Length, commonHeader.HubID)
+            return new GoIntoBootModeMessage((ushort)data.Length, data[1])
             {
-                Message = commonHeader.Message,
+                Message = data,
             };
         }
 
@@ -53,7 +52,7 @@ namespace LegoBluetooth
         /// Serializes the GoIntoBootModeMessage to a byte array.
         /// </summary>
         /// <returns>A byte array representing the GoIntoBootModeMessage.</returns>
-        public byte[] ToByteArray()
+        public override byte[] ToByteArray()
         {
             byte[] data;
             int index = 0;

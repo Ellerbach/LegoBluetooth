@@ -57,7 +57,6 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid data array. Must contain at least 5 bytes.", nameof(data));
             }
 
-            var commonHeader = CommonMessageHeader.Decode(data);
             byte subCommand = data[3];
             byte portID = 0;
             byte portIDA = 0;
@@ -77,9 +76,9 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid data array for the specified sub-command.", nameof(data));
             }
 
-            return new VirtualPortSetupMessage(commonHeader.Length, commonHeader.HubID, subCommand, portID, portIDA, portIDB)
+            return new VirtualPortSetupMessage((ushort)data.Length, data[1], subCommand, portID, portIDA, portIDB)
             {
-                Message = commonHeader.Message,
+                Message = data,
             };
         }
 
@@ -87,7 +86,7 @@ namespace LegoBluetooth
         /// Serializes the VirtualPortSetupMessage to a byte array.
         /// </summary>
         /// <returns>A byte array representing the VirtualPortSetupMessage.</returns>
-        public byte[] ToByteArray()
+        public override byte[] ToByteArray()
         {
             byte[] data;
             int index = 0;

@@ -52,10 +52,9 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid data array. Must contain at least 5 bytes.", nameof(data));
             }
 
-            var commonHeader = CommonMessageHeader.Decode(data);
-            var message = new PortValueSingleMessage(commonHeader.Length, commonHeader.HubID)
+            var message = new PortValueSingleMessage((ushort)data.Length, data[1])
             {
-                Message = commonHeader.Message,
+                Message = data,
             };
 
             int index = 3;
@@ -100,7 +99,7 @@ namespace LegoBluetooth
         /// Serializes the PortValueSingleMessage to a byte array.
         /// </summary>
         /// <returns>A byte array representing the PortValueSingleMessage.</returns>
-        public byte[] ToByteArray()
+        public override byte[] ToByteArray()
         {
             ArrayList data = new ArrayList();
 

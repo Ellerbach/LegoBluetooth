@@ -43,13 +43,12 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid data array. Must contain at least 5 bytes.", nameof(data));
             }
 
-            var commonHeader = CommonMessageHeader.Decode(data);
             byte commandType = data[3];
             ErrorCode errorCode = (ErrorCode)data[4];
 
-            return new ErrorMessage(commonHeader.Length, commonHeader.HubID, commandType, errorCode)
+            return new ErrorMessage((ushort)data.Length, data[1], commandType, errorCode)
             {
-                Message = commonHeader.Message,
+                Message = data,
             };
         }
 
@@ -57,7 +56,7 @@ namespace LegoBluetooth
         /// Serializes the ErrorMessage to a byte array.
         /// </summary>
         /// <returns>A byte array representing the ErrorMessage.</returns>
-        public byte[] ToByteArray()
+        public override byte[] ToByteArray()
         {
             byte[] data;
             int index = 0;

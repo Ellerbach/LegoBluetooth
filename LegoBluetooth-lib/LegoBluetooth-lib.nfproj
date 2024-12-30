@@ -19,7 +19,6 @@
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
     <Compile Include="Advertising.cs" />
-    <Compile Include="Class1.cs" />
     <Compile Include="Enums\ActionTypes.cs" />
     <Compile Include="Enums\EncodedBitField.cs" />
     <Compile Include="Enums\DeviceCapabilities.cs" />
@@ -43,10 +42,12 @@
     <Compile Include="Enums\ModeInformationType.cs" />
     <Compile Include="Enums\PortInputFormatSetupSubCommand.cs" />
     <Compile Include="Enums\StartupCompletionInfo.cs" />
+    <Compile Include="Enums\Status.cs" />
     <Compile Include="Enums\SubCommandType.cs" />
     <Compile Include="Enums\SystemType.cs" />
     <Compile Include="Helper\PortBufferingStateMachine.cs" />
     <Compile Include="Helper\PortOutputCommandHelper.cs" />
+    <Compile Include="Helper\SystemTypeDeviceTypeHelper.cs" />
     <Compile Include="Helper\TachoMathHelper.cs" />
     <Compile Include="Message\CommonMessageHeader.cs" />
     <Compile Include="Message\ErrorMessage.cs" />

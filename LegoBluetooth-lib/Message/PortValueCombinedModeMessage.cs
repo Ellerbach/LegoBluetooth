@@ -59,13 +59,12 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid data array. Must contain at least 6 bytes.", nameof(data));
             }
 
-            var commonHeader = CommonMessageHeader.Decode(data);
             byte portID = data[3];
             ushort bitPointer = BitConverter.ToUInt16(data, 4);
 
-            var message = new PortValueCombinedModeMessage(commonHeader.Length, commonHeader.HubID, portID)
+            var message = new PortValueCombinedModeMessage((ushort)data.Length, data[1], portID)
             {
-                Message = commonHeader.Message,
+                Message = data,
             };
 
             int index = 6;
@@ -109,7 +108,7 @@ namespace LegoBluetooth
         /// Serializes the PortValueCombinedModeMessage to a byte array.
         /// </summary>
         /// <returns>A byte array representing the PortValueCombinedModeMessage.</returns>
-        public byte[] ToByteArray()
+        public override byte[] ToByteArray()
         {
             ArrayList data = new ArrayList();
 

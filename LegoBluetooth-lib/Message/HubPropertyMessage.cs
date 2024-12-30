@@ -92,7 +92,7 @@ namespace LegoBluetooth
         /// Serializes the HubPropertyMessage to a byte array.
         /// </summary>
         /// <returns>A byte array representing the HubPropertyMessage.</returns>
-        public byte[] ToByteArray()
+        public override byte[] ToByteArray()
         {
             byte[] data;
             int index = 0;
