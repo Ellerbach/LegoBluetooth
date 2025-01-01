@@ -77,13 +77,16 @@ namespace LegoBluetooth
                 index = 1;
             }
 
-            byte hubID = data[index];
-            byte messageType = data[index + 1];
-            HubProperty property = (HubProperty)data[index + 2];
-            HubPropertyOperation operation = (HubPropertyOperation)data[index + 3];
+            byte hubID = data[index++];
+            byte messageType = data[index++];
+            HubProperty property = (HubProperty)data[index++];
+            HubPropertyOperation operation = (HubPropertyOperation)data[index++];
 
-            byte[] payload = new byte[length - 4];
-            Array.Copy(data, index + 4, payload, 0, length - 4);
+            byte[] payload = new byte[length - 5];
+            if (payload.Length > 0)
+            {
+                Array.Copy(data, index, payload, 0, length - 5);
+            }
 
             return new HubPropertyMessage(length, hubID, property, operation, payload);
         }
@@ -97,14 +100,16 @@ namespace LegoBluetooth
             byte[] data;
             int index = 0;
 
+            Length = (Payload != null) ? (ushort)(5 + Payload.Length) : (ushort)5;
+
             if (Length < 127)
             {
-                data = new byte[Length + 1];
+                data = new byte[Length];
                 data[index++] = (byte)Length;
             }
             else
             {
-                data = new byte[Length + 2];
+                data = new byte[Length + 1];
                 data[index++] = (byte)((Length >> 8) | 0x80);
                 data[index++] = (byte)(Length & 0xFF);
             }
@@ -113,6 +118,11 @@ namespace LegoBluetooth
             data[index++] = (byte)MessageType;
             data[index++] = (byte)Property;
             data[index++] = (byte)Operation;
+
+            if ((Payload != null) && (Payload.Length > 0))
+            {
+                Array.Copy(Payload, 0, data, index, Payload.Length);
+            }
 
             Message = data;
 

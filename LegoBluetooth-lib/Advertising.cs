@@ -10,12 +10,12 @@ namespace LegoBluetooth
         /// <summary>
         /// Gets the GUID for the Hub service.
         /// </summary>
-        public Guid HubService { get; } = new Guid("00001623-1212-EFDE-1623-785FEABCD123");
+        public static Guid HubService { get; } = new Guid("00001623-1212-EFDE-1623-785FEABCD123");
 
         /// <summary>
         /// Gets the GUID for the Hub characteristic.
         /// </summary>
-        public Guid HubCharacteristic { get; } = new Guid("00001624-1212-EFDE-1623-785FEABCD123");
+        public static Guid HubCharacteristic { get; } = new Guid("00001624-1212-EFDE-1623-785FEABCD123");
 
         // This doesn't seems to be used
         // public byte DataTypeName { get; } = 0xFF;

@@ -45,7 +45,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LegoBluetooth-lib\LegoBluetooth-lib.nfproj" />
+    <ProjectReference Include="..\LegoBluetooth-lib\LegoBluetooth.nfproj" />
   </ItemGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets')" />
   <ProjectExtensions>
