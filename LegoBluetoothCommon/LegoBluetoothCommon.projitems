@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>1b282de5-ddc3-42a3-97b8-48313d836335</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>LegoBluetooth</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)BluetoothAdvertisingData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)bluetooth\IBluetooth.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bluetooth\StatusError.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Device\GenericDevice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Device\MoveHub.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DTO\Alert.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\ActionTypes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\DeviceCapabilities.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\DeviceType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\EncodedBitField.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\ErrorCode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\FeedbackMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\HubAlertOperation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\HubAlertPayload.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\HubAlertType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\HubPropertyOperation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\HubPropertyReference.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\HWNetworkCommandType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\HWNetworkFamily.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\HWNetworkSubFamily.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\InformationType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\IOEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\IOTypeID.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\LastNetWorkID.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\Mapping.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\MessageType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\ModeInformationType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\PortInputFormatSetupSubCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\StartupCompletionInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\Status.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\SubCommandType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\SystemType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helper\PortBufferingStateMachine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helper\PortOutputCommandHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helper\SystemTypeDeviceTypeHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helper\TachoMathHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)helper\VersionNumberEncoder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\CommonMessageHeader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\ErrorMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\GoIntoBootModeMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\HubActionMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\HubAlertMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\HubAttachedIOMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\HubPropertyMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\HWNetworkMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\PortInformationMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\PortInformationRequestMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\PortInputFormatCombinedModeMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\PortInputFormatSetupCombinedModeMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\PortInputFormatSetupSingleMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\PortInputFormatSingleMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\PortModeInformationMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\PortModeInformationRequestMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\PortOutputCommandFeedbackMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\PortOutputCommandMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\PortValueCombinedModeMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\PortValueSingleMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\VirtualPortSetupMessage.cs" />
+  </ItemGroup>
+</Project>

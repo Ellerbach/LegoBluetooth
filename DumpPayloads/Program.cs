@@ -1,3 +1,6 @@
+// Licensed to Laurent Ellerbach under one or more agreements.
+// Laurent Ellerbach licenses this file to you under the MIT license.
+
 using nanoFramework.Device.Bluetooth.Advertisement;
 using nanoFramework.Device.Bluetooth;
 using System;
@@ -122,12 +125,13 @@ namespace DumpPayloads
                 new byte[] { 0x05, 0x00, 0x01, 0x0D, 0x05 },
                 new byte[] { 0x05, 0x00, 0x01, 0x02, 0x02 },
                 new byte[] { 0x05, 0x00, 0x01, 0x02, 0x05 },
-                new byte[] { 0x05, 0x00, 0x01, 0x05, 0x02 },
-                new byte[] { 0x05, 0x00, 0x01, 0x05, 0x05 },
+                //new byte[] { 0x05, 0x00, 0x01, 0x05, 0x02 },
+                //new byte[] { 0x05, 0x00, 0x01, 0x05, 0x05 },
                 new byte[] { 0x05, 0x00, 0x01, 0x06, 0x02 },
                 new byte[] { 0x05, 0x00, 0x01, 0x06, 0x05 },
                 new byte[] { 0x05, 0x00, 0x01, 0x01, 0x02 },
-                new byte[] { 0x05, 0x00, 0x01, 0x01, 0x05 },
+                new byte[] { 0x05, 0x00, 0x01, 0x01, 0x05 },                
+                new byte[] { 0x09, 0x00, 0x81, 0x10, 0x11, 0x07, 0x32, 0x64, 0x00 },
             };
 
             if (device == null)
@@ -177,6 +181,7 @@ namespace DumpPayloads
                                 Debug.WriteLine($"<- {BitConverter.ToString(ts)}");
                             }
 
+                            Thread.Sleep(100);
                         }
                     }
                 }
