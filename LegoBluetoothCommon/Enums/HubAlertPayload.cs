@@ -9,6 +9,11 @@ namespace LegoBluetooth
     public enum HubAlertPayload : byte
     {
         /// <summary>
+        /// Used not to send the status when creating a downstream class.
+        /// </summary>
+        NoStatus = 0x01,
+
+        /// <summary>
         /// Status OK.
         /// </summary>
         StatusOK = 0x00,

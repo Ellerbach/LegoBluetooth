@@ -31,6 +31,8 @@ namespace LegoBluetoothHub
             bluetooth.ClientJoiningStateChanged = hub.ClientJoiningStateChanged;
             bluetooth.Setup(hub.BluetoothAdvertisingData.ToByteArray(), hub.Name);
 
+            bluetooth.Connect();
+
             // Keep the application running
             Thread.Sleep(Timeout.Infinite);
         }

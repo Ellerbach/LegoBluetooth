@@ -20,6 +20,9 @@ namespace LegoBluetooth
                 Status.RequestConnect | Status.CanBeCentral | Status.CanBePeripheral,
                 0
             );
+            FWVersion = new Version(2, 0, 0, 17);
+            HWVersion = new Version(0, 4, 0, 0);
+            SystemTypeID = SystemTypeDeviceNumberHelper.Encode(SystemType.LegoSystem1, DeviceType.BoostHub);
         }
 
         public override void ClientJoiningStateChanged(bool joining)

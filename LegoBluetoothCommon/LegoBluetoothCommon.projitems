@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Device\MoveHub.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DTO\Alert.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\ActionTypes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\BatteryType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\DeviceCapabilities.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\DeviceType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\EncodedBitField.cs" />

@@ -33,6 +33,9 @@ namespace LegoBluetooth
 
             try
             {
+                // Give device a name
+                _server.DeviceName = _name;
+
                 //The GattServiceProvider is used to create and advertise the primary service definition.
                 //An extra device information service will be automatically created.
                 GattServiceProviderResult result = GattServiceProvider.Create(BluetoothAdvertisingData.HubService);
@@ -86,8 +89,8 @@ namespace LegoBluetooth
 
         public bool Connect()
         {
-            // Give device a name
-            _server.DeviceName = _name;
+            // Ensure it's started
+            _server.Start();
 
             _ble.WriteRequested += (o, e) =>
             {
@@ -119,16 +122,16 @@ namespace LegoBluetooth
                     if (_ble.SubscribedClients.Length > 0)
                     {
                         Debug.WriteLine("New Subscribed Client");
-                        _serviceProvider.StopAdvertising();
-                        Debug.WriteLine("Stop advertising LEGO Hub");
+                        //_serviceProvider.StopAdvertising();
+                        //Debug.WriteLine("Stop advertising LEGO Hub");
                         ClientJoiningStateChanged(true);
                     }
                     else
                     {
                         Debug.WriteLine("No Subscribed Client!");
                         ClientJoiningStateChanged(false);
-                        Debug.WriteLine("Advertising LEGO Hub...");
-                        _serviceProvider.StartAdvertising();
+                        //Debug.WriteLine("Advertising LEGO Hub...");
+                        //_serviceProvider.StartAdvertising();
                     }
                 }
                 catch (Exception ex)
