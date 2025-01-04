@@ -7,7 +7,7 @@ using System.Collections;
 
 namespace LegoBluetooth
 {
-    public class MoveHub : GenericDevice
+    public class MoveHub : GenericHub
     {
         public MoveHub(IBluetooth bluetooth) : base(bluetooth)
         {

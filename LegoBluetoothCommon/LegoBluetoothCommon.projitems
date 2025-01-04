@@ -13,7 +13,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)bluetooth\IBluetooth.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bluetooth\StatusError.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Device\GenericDevice.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Device\MoveHub.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Hub\GenericHub.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Hub\MoveHub.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DTO\Alert.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DTO\PortFeedbackEntry.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DTO\PortValueEntryCombined.cs" />
@@ -72,5 +73,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Message\PortValueCombinedModeMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Message\PortValueSingleMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Message\VirtualPortSetupMessage.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Hub\" />
   </ItemGroup>
 </Project>
