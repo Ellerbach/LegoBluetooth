@@ -33,19 +33,20 @@ namespace LegoBluetooth
         /// <summary>
         /// Initializes a new instance of the <see cref="PortInputFormatSingleMessage"/> class.
         /// </summary>
-        /// <param name="length">The length of the entire message in bytes.</param>
         /// <param name="hubID">The Hub ID.</param>
         /// <param name="portID">The Port ID.</param>
         /// <param name="mode">The mode of the addressed Input.</param>
         /// <param name="deltaInterval">The delta interval for triggering a new value update notification.</param>
         /// <param name="notificationEnabled">A value indicating whether notifications are enabled.</param>
-        public PortInputFormatSingleMessage(ushort length, byte hubID, byte portID, byte mode, uint deltaInterval, bool notificationEnabled)
-            : base(length, hubID, MessageType.PortInputFormatSingle)
+        public PortInputFormatSingleMessage(byte hubID, byte portID, byte mode, uint deltaInterval, bool notificationEnabled)
+            : base(hubID, MessageType.PortInputFormatSingle)
         {
+            // Section 3.23
             PortID = portID;
             Mode = mode;
             DeltaInterval = deltaInterval;
             NotificationEnabled = notificationEnabled;
+            Length = 10;
         }
 
         /// <summary>
@@ -65,9 +66,10 @@ namespace LegoBluetooth
             uint deltaInterval = BitConverter.ToUInt32(data, 5);
             bool notificationEnabled = data[9] == 1;
 
-            return new PortInputFormatSingleMessage((ushort)data.Length, data[1], portID, mode, deltaInterval, notificationEnabled)
+            return new PortInputFormatSingleMessage(data[1], portID, mode, deltaInterval, notificationEnabled)
             {
                 Message = data,
+                Length = data[0],
             };
         }
 
@@ -77,21 +79,12 @@ namespace LegoBluetooth
         /// <returns>A byte array representing the PortInputFormatSingleMessage.</returns>
         public override byte[] ToByteArray()
         {
-            byte[] data;
+            Length = 10;
+
+            byte[] data = new byte[Length];
             int index = 0;
 
-            if (Length < 127)
-            {
-                data = new byte[Length + 1];
-                data[index++] = (byte)Length;
-            }
-            else
-            {
-                data = new byte[Length + 2];
-                data[index++] = (byte)((Length >> 8) | 0x80);
-                data[index++] = (byte)(Length & 0xFF);
-            }
-
+            data[index++] = (byte)Length;
             data[index++] = HubID;
             data[index++] = (byte)MessageType;
             data[index++] = PortID;

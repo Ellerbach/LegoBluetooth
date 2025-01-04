@@ -29,7 +29,7 @@ namespace LegoBluetooth
         /// <summary>
         /// Gets or sets the name for Information Type == NAME.
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the raw minimum value for Information Type == RAW.
@@ -64,7 +64,7 @@ namespace LegoBluetooth
         /// <summary>
         /// Gets or sets the symbol for Information Type == SYMBOL.
         /// </summary>
-        public string Symbol { get; set; }
+        public string Symbol { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the mapping for Information Type == MAPPING.
@@ -89,14 +89,14 @@ namespace LegoBluetooth
         /// <summary>
         /// Initializes a new instance of the <see cref="PortModeInformationMessage"/> class.
         /// </summary>
-        /// <param name="length">The length of the entire message in bytes.</param>
         /// <param name="hubID">The Hub ID.</param>
         /// <param name="portID">The Port ID.</param>
         /// <param name="mode">The mode of the Input.</param>
         /// <param name="modeInformationType">The mode information type.</param>
-        public PortModeInformationMessage(ushort length, byte hubID, byte portID, byte mode, ModeInformationType modeInformationType)
-            : base(length, hubID, MessageType.PortModeInformation)
+        public PortModeInformationMessage(byte hubID, byte portID, byte mode, ModeInformationType modeInformationType)
+            : base(hubID, MessageType.PortModeInformation)
         {
+            // Section 3.20
             PortID = portID;
             Mode = mode;
             ModeInformationType = modeInformationType;
@@ -118,9 +118,10 @@ namespace LegoBluetooth
             byte mode = data[4];
             ModeInformationType modeInformationType = (ModeInformationType)data[5];
 
-            var message = new PortModeInformationMessage((ushort)data.Length, data[1], portID, mode, modeInformationType)
+            var message = new PortModeInformationMessage(data[1], portID, mode, modeInformationType)
             {
                 Message = data,
+                Length = data[0],
             };
 
             switch (modeInformationType)
@@ -170,65 +171,69 @@ namespace LegoBluetooth
         /// <returns>A byte array representing the PortModeInformationMessage.</returns>
         public override byte[] ToByteArray()
         {
-            byte[] data;
+            byte[] data;            
+            
+            switch (ModeInformationType)
+            {
+                case ModeInformationType.Name:
+                    Length = (ushort)(6 + Name.Length);
+                    data = new byte[Length];
+                    Array.Copy(Encoding.UTF8.GetBytes(Name), 0, data, 6, Name.Length);
+                    break;
+                case ModeInformationType.Raw:
+                    Length = 14;
+                    data = new byte[Length];
+                    Array.Copy(BitConverter.GetBytes(RawMin), 0, data, 6, 4);
+                    Array.Copy(BitConverter.GetBytes(RawMax), 0, data, 10, 4);
+                    break;
+                case ModeInformationType.Percent:
+                    Length = 14;
+                    data = new byte[Length];
+                    Array.Copy(BitConverter.GetBytes(PctMin), 0, data, 6, 4);
+                    Array.Copy(BitConverter.GetBytes(PctMax), 0, data, 10, 4);
+                    break;
+                case ModeInformationType.SI:
+                    Length = 14;
+                    data = new byte[Length];
+                    Array.Copy(BitConverter.GetBytes(SiMin), 0, data, 6, 4);
+                    Array.Copy(BitConverter.GetBytes(SiMax), 0, data, 10, 4);
+                    break;
+                case ModeInformationType.Symbol:
+                    Length = (ushort)(6 + Symbol.Length); ;
+                    data = new byte[Length];
+                    Array.Copy(Encoding.UTF8.GetBytes(Symbol), 0, data, 6, Symbol.Length);
+                    break;
+                case ModeInformationType.Mapping:
+                    Length = 8;
+                    data = new byte[Length];
+                    Array.Copy(BitConverter.GetBytes(Mapping), 0, data, 6, 2);
+                    break;
+                case ModeInformationType.MotorBias:
+                    Length = 7;
+                    data = new byte[Length];
+                    data[6] = MotorBias;
+                    break;
+                case ModeInformationType.CapabilityBits:
+                    Length = 12;
+                    data = new byte[Length];
+                    Array.Copy(CapabilityBits, 0, data, 6, 6);
+                    break;
+                case ModeInformationType.ValueFormat:
+                    Length = 10;
+                    data = new byte[Length];
+                    Array.Copy(ValueFormat, 0, data, 6, 4);
+                    break;
+                default:
+                    throw new ArgumentException("Invalid mode information type.", nameof(ModeInformationType));
+            }
+
             int index = 0;
-
-            if (Length < 127)
-            {
-                data = new byte[Length + 1];
-                data[index++] = (byte)Length;
-            }
-            else
-            {
-                data = new byte[Length + 2];
-                data[index++] = (byte)((Length >> 8) | 0x80);
-                data[index++] = (byte)(Length & 0xFF);
-            }
-
+            data[index++] = (byte)Length;
             data[index++] = HubID;
             data[index++] = (byte)MessageType;
             data[index++] = PortID;
             data[index++] = Mode;
             data[index++] = (byte)ModeInformationType;
-
-            switch (ModeInformationType)
-            {
-                case ModeInformationType.Name:
-                    Array.Copy(Encoding.UTF8.GetBytes(Name), 0, data, index, Name.Length);
-                    break;
-                case ModeInformationType.Raw:
-                    Array.Copy(BitConverter.GetBytes(RawMin), 0, data, index, 4);
-                    index += 4;
-                    Array.Copy(BitConverter.GetBytes(RawMax), 0, data, index, 4);
-                    break;
-                case ModeInformationType.Percent:
-                    Array.Copy(BitConverter.GetBytes(PctMin), 0, data, index, 4);
-                    index += 4;
-                    Array.Copy(BitConverter.GetBytes(PctMax), 0, data, index, 4);
-                    break;
-                case ModeInformationType.SI:
-                    Array.Copy(BitConverter.GetBytes(SiMin), 0, data, index, 4);
-                    index += 4;
-                    Array.Copy(BitConverter.GetBytes(SiMax), 0, data, index, 4);
-                    break;
-                case ModeInformationType.Symbol:
-                    Array.Copy(Encoding.UTF8.GetBytes(Symbol), 0, data, index, Symbol.Length);
-                    break;
-                case ModeInformationType.Mapping:
-                    Array.Copy(BitConverter.GetBytes(Mapping), 0, data, index, 2);
-                    break;
-                case ModeInformationType.MotorBias:
-                    data[index] = MotorBias;
-                    break;
-                case ModeInformationType.CapabilityBits:
-                    Array.Copy(CapabilityBits, 0, data, index, 6);
-                    break;
-                case ModeInformationType.ValueFormat:
-                    Array.Copy(ValueFormat, 0, data, index, 4);
-                    break;
-                default:
-                    throw new ArgumentException("Invalid mode information type.", nameof(ModeInformationType));
-            }
 
             Message = data;
 

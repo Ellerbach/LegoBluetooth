@@ -12,22 +12,6 @@ namespace LegoBluetooth
     public class PortValueSingleMessage : CommonMessageHeader
     {
         /// <summary>
-        /// Represents a port value entry.
-        /// </summary>
-        public class PortValueEntry
-        {
-            /// <summary>
-            /// Gets or sets the Port ID associated with the Attached I/O assigned by the Hub.
-            /// </summary>
-            public byte PortID { get; set; }
-
-            /// <summary>
-            /// Gets or sets the input value of the addressed port.
-            /// </summary>
-            public object InputValue { get; set; }
-        }
-
-        /// <summary>
         /// Gets or sets the list of port value entries.
         /// </summary>
         public ArrayList PortValues { get; set; }
@@ -35,11 +19,11 @@ namespace LegoBluetooth
         /// <summary>
         /// Initializes a new instance of the <see cref="PortValueSingleMessage"/> class.
         /// </summary>
-        /// <param name="length">The length of the entire message in bytes.</param>
         /// <param name="hubID">The Hub ID.</param>
-        public PortValueSingleMessage(ushort length, byte hubID)
-            : base(length, hubID, MessageType.PortValueSingle)
+        public PortValueSingleMessage(byte hubID)
+            : base(hubID, MessageType.PortValueSingle)
         {
+            // Section 3.21
             PortValues = new ArrayList();
         }
 
@@ -55,11 +39,12 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid data array. Must contain at least 5 bytes.", nameof(data));
             }
 
-            var message = new PortValueSingleMessage((ushort)data.Length, data[1])
+            var message = new PortValueSingleMessage(data[1])
             {
                 Message = data,
             };
 
+            // TODO: fix all this, this is not working properly
             int index = 3;
             while (index < data.Length)
             {
@@ -106,56 +91,75 @@ namespace LegoBluetooth
         {
             ArrayList data = new ArrayList();
 
-            if (Length < 127)
-            {
-                data.Add((byte)Length);
-            }
-            else
-            {
-                data.Add((byte)((Length >> 8) | 0x80));
-                data.Add((byte)(Length & 0xFF));
-            }
+            int length = 1;
 
             data.Add(HubID);
+            length++;
             data.Add((byte)MessageType);
+            length++;
 
             foreach (PortValueEntry portValue in PortValues)
             {
                 data.Add(portValue.PortID);
+                length++;
 
                 switch (portValue.InputValue)
                 {
                     case byte value8:
-                        data.Add(0x00); // 8 bit
+                        // 8 bit
+                        data.Add(0x00);
+                        length++;
                         data.Add(value8);
+                        length++;
                         break;
                     case ushort value16:
-                        data.Add(0x01); // 16 bit
+                        // 16 bit
+                        data.Add(0x01);
+                        length++;
                         foreach (byte b in BitConverter.GetBytes(value16))
                         {
                             data.Add(b);
+                            length++;
                         }
 
                         break;
                     case uint value32:
-                        data.Add(0x02); // 32 bit
+                        // 32 bit
+                        data.Add(0x02);
+                        length++;
                         foreach (byte b in BitConverter.GetBytes(value32))
                         {
                             data.Add(b);
+                            length++;
                         }
 
                         break;
                     case float valueFloat:
-                        data.Add(0x03); // FLOAT
+                        // FLOAT
+                        data.Add(0x03);
+                        length++;
                         foreach (byte b in BitConverter.GetBytes(valueFloat))
                         {
                             data.Add(b);
+                            length++;
                         }
 
                         break;
                     default:
                         throw new ArgumentException("Invalid input value type.", nameof(portValue.InputValue));
                 }
+            }
+
+            Length = (ushort)length;
+            // Compute properly the length
+            if (length > 127)
+            {
+                data.Insert(0, (byte)((length >> 8) | 0x80));
+                data.Insert(1, (byte)(length & 0xFF));
+            }
+            else
+            {
+                data.Insert(0, (byte)length);
             }
 
             return (byte[])data.ToArray(typeof(byte));
@@ -167,7 +171,7 @@ namespace LegoBluetooth
         /// <returns>A string representation of the port value (single) message.</returns>
         public override string ToString()
         {
-            string portValuesString = "";
+            string portValuesString = string.Empty;
             foreach (PortValueEntry portValue in PortValues)
             {
                 if (portValuesString.Length > 0)

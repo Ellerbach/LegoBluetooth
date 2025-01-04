@@ -12,22 +12,6 @@ namespace LegoBluetooth
     public class PortValueCombinedModeMessage : CommonMessageHeader
     {
         /// <summary>
-        /// Represents a port value entry.
-        /// </summary>
-        public class PortValueEntry
-        {
-            /// <summary>
-            /// Gets or sets the bit pointer for the mode/dataset combination.
-            /// </summary>
-            public ushort BitPointer { get; set; }
-
-            /// <summary>
-            /// Gets or sets the input value of the addressed port.
-            /// </summary>
-            public object InputValue { get; set; }
-        }
-
-        /// <summary>
         /// Gets or sets the Port ID associated with the Attached I/O assigned by the Hub.
         /// </summary>
         public byte PortID { get; set; }
@@ -40,12 +24,12 @@ namespace LegoBluetooth
         /// <summary>
         /// Initializes a new instance of the <see cref="PortValueCombinedModeMessage"/> class.
         /// </summary>
-        /// <param name="length">The length of the entire message in bytes.</param>
         /// <param name="hubID">The Hub ID.</param>
         /// <param name="portID">The Port ID.</param>
-        public PortValueCombinedModeMessage(ushort length, byte hubID, byte portID)
-            : base(length, hubID, MessageType.PortValueCombinedMode)
+        public PortValueCombinedModeMessage(byte hubID, byte portID)
+            : base(hubID, MessageType.PortValueCombinedMode)
         {
+            // Section 3.22
             PortID = portID;
             PortValues = new ArrayList();
         }
@@ -62,15 +46,23 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid data array. Must contain at least 6 bytes.", nameof(data));
             }
 
-            byte portID = data[3];
-            ushort bitPointer = BitConverter.ToUInt16(data, 4);
+            // We need to compute the proper length
+            int index = data.Length > 127 ? 2 : 1;
 
-            var message = new PortValueCombinedModeMessage((ushort)data.Length, data[1], portID)
+            byte hubId = data[index++];
+            // Skipping the message type
+            index++;
+            byte portID = data[index++];
+            ushort bitPointer = BitConverter.ToUInt16(data, index);
+            index += 2;
+
+            var message = new PortValueCombinedModeMessage(hubId, portID)
             {
                 Message = data,
+                Length = (ushort)(data.Length > 127 ? data.Length - 1: data.Length),
             };
 
-            int index = 6;
+            // TODO This doesn't work, needs adjustements
             while (index < data.Length)
             {
                 object inputValue;
@@ -95,7 +87,7 @@ namespace LegoBluetooth
                         throw new ArgumentException("Invalid value type.", nameof(data));
                 }
 
-                message.PortValues.Add(new PortValueEntry
+                message.PortValues.Add(new PortValueEntryCombined
                 {
                     BitPointer = bitPointer,
                     InputValue = inputValue
@@ -114,55 +106,66 @@ namespace LegoBluetooth
         public override byte[] ToByteArray()
         {
             ArrayList data = new ArrayList();
-
-            if (Length < 127)
-            {
-                data.Add((byte)Length);
-            }
-            else
-            {
-                data.Add((byte)((Length >> 8) | 0x80));
-                data.Add((byte)(Length & 0xFF));
-            }
+            int length = 1;
 
             data.Add(HubID);
+            length++;
             data.Add((byte)MessageType);
+            length++;
             data.Add(PortID);
+            length++;
 
-            foreach (PortValueEntry portValue in PortValues)
+            foreach (PortValueEntryCombined portValue in PortValues)
             {
                 byte[] bitPointerBytes = BitConverter.GetBytes(portValue.BitPointer);
                 foreach (byte b in bitPointerBytes)
                 {
                     data.Add(b);
+                    length++;
                 }
 
                 switch (portValue.InputValue)
                 {
                     case byte value8:
                         data.Add(value8);
+                        length++;
                         break;
                     case ushort value16:
                         foreach (byte b in BitConverter.GetBytes(value16))
                         {
                             data.Add(b);
+                            length++;
                         }
                         break;
                     case uint value32:
                         foreach (byte b in BitConverter.GetBytes(value32))
                         {
                             data.Add(b);
+                            length++;
                         }
                         break;
                     case float valueFloat:
                         foreach (byte b in BitConverter.GetBytes(valueFloat))
                         {
                             data.Add(b);
+                            length++;
                         }
                         break;
                     default:
                         throw new ArgumentException("Invalid input value type.", nameof(portValue.InputValue));
                 }
+            }
+
+            // Now need to encode properly the length
+            Length = (ushort)length;
+            if (Length < 127)
+            {
+                data.Insert(0, (byte)Length);
+            }
+            else
+            {
+                data.Insert(0, (byte)((Length >> 8) | 0x80));
+                data.Insert(1, (byte)(Length & 0xFF));
             }
 
             return (byte[])data.ToArray(typeof(byte));
@@ -175,7 +178,7 @@ namespace LegoBluetooth
         public override string ToString()
         {
             string portValuesString = "";
-            foreach (PortValueEntry portValue in PortValues)
+            foreach (PortValueEntryCombined portValue in PortValues)
             {
                 if (portValuesString.Length > 0)
                 {

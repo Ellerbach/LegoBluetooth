@@ -33,15 +33,15 @@ namespace LegoBluetooth
         /// <summary>
         /// Initializes a new instance of the <see cref="VirtualPortSetupMessage"/> class.
         /// </summary>
-        /// <param name="length">The length of the entire message in bytes.</param>
         /// <param name="hubID">The Hub ID.</param>
         /// <param name="subCommand">The sub-command for the virtual port setup.</param>
         /// <param name="portID">The Port ID for the virtual port (used when SubCommand is 0).</param>
         /// <param name="portIDA">The Port ID A for the first synchronizable port (used when SubCommand is 1).</param>
         /// <param name="portIDB">The Port ID B for the second synchronizable port (used when SubCommand is 1).</param>
-        public VirtualPortSetupMessage(ushort length, byte hubID, byte subCommand, byte portID = 0, byte portIDA = 0, byte portIDB = 0)
-            : base(length, hubID, MessageType.VirtualPortSetup)
+        public VirtualPortSetupMessage(byte hubID, byte subCommand, byte portID = 0, byte portIDA = 0, byte portIDB = 0)
+            : base(hubID, MessageType.VirtualPortSetup)
         {
+            // Section 3.25
             SubCommand = subCommand;
             PortID = portID;
             PortIDA = portIDA;
@@ -79,9 +79,10 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid data array for the specified sub-command.", nameof(data));
             }
 
-            return new VirtualPortSetupMessage((ushort)data.Length, data[1], subCommand, portID, portIDA, portIDB)
+            return new VirtualPortSetupMessage(data[1], subCommand, portID, portIDA, portIDB)
             {
                 Message = data,
+                Length = data[0],
             };
         }
 
@@ -91,21 +92,11 @@ namespace LegoBluetooth
         /// <returns>A byte array representing the VirtualPortSetupMessage.</returns>
         public override byte[] ToByteArray()
         {
-            byte[] data;
+            Length = (byte)(SubCommand == 0x00 ? 5 : 6);
+            byte[] data = new byte[Length];
             int index = 0;
 
-            if (Length < 127)
-            {
-                data = new byte[Length + 1];
-                data[index++] = (byte)Length;
-            }
-            else
-            {
-                data = new byte[Length + 2];
-                data[index++] = (byte)((Length >> 8) | 0x80);
-                data[index++] = (byte)(Length & 0xFF);
-            }
-
+            data[index++] = (byte)Length;
             data[index++] = HubID;
             data[index++] = (byte)MessageType;
             data[index++] = SubCommand;

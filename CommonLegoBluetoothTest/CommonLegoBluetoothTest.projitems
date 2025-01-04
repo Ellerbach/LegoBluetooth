@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>f8555b36-9a63-4f9a-bae0-e88f20f33504</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>CommonLegoBluetoothTest</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)CommonMessageHeaderTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HubPropertyMessageTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ErrorMessageTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HWNetworkMessageTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HubActionMessageTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HubAlertMessageTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HubAttachedIOMessageTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PortInformationMessageTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PortInformationRequestMessageTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PortInputFormatCombinedModeMessageTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PortInputFormatSetupCombinedModeMessageTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PortInputFormatSetupSingleMessageTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PortInputFormatSingleMessageTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PortModeInformationMessageTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PortModeInformationRequestMessageTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PortOutputCommandFeedbackMessageTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PortOutputCommandMessageTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PortValueCombinedModeMessageTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PortValueSingleMessageTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VirtualPortSetupMessageTests.cs" />
+  </ItemGroup>
+</Project>

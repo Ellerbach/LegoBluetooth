@@ -37,17 +37,18 @@ namespace LegoBluetooth
         /// <summary>
         /// Initializes a new instance of the <see cref="HubAlertMessage"/> class.
         /// </summary>
-        /// <param name="length">The length of the entire message in bytes.</param>
         /// <param name="hubID">The Hub ID.</param>
         /// <param name="alertType">The alert type.</param>
         /// <param name="alertOperation">The alert operation.</param>
         /// <param name="alertPayload">The alert payload.</param>
-        public HubAlertMessage(ushort length, byte hubID, HubAlertType alertType, HubAlertOperation alertOperation, HubAlertPayload alertPayload)
-            : base(length, hubID, MessageType.HubAlerts)
+        public HubAlertMessage(byte hubID, HubAlertType alertType, HubAlertOperation alertOperation, HubAlertPayload alertPayload)
+            : base(hubID, MessageType.HubAlerts)
         {
+            // Section 3.7
             AlertType = alertType;
             AlertOperation = alertOperation;
             AlertPayload = alertPayload;
+            Length = (ushort)(5 + (AlertPayload != HubAlertPayload.NoStatus ? 1 : 0));
         }
 
         /// <summary>
@@ -69,11 +70,12 @@ namespace LegoBluetooth
             if (data.Length > 5)
             {
                 alertPayload = (HubAlertPayload)data[5];
-            }            
+            }
 
-            return new HubAlertMessage((ushort)data.Length, data[1], alertType, alertOperation, alertPayload)
+            return new HubAlertMessage(data[1], alertType, alertOperation, alertPayload)
             {
                 Message = data,
+                Length = data[0]
             };
         }
 
@@ -83,8 +85,7 @@ namespace LegoBluetooth
         /// <returns>A byte array representing the HubAlertMessage.</returns>
         public override byte[] ToByteArray()
         {
-            Length = (ushort)(5 + (AlertPayload != HubAlertPayload.NoStatus ? 1 : 0));
-
+            Length = AlertPayload == HubAlertPayload.NoStatus ? (ushort)5 : (ushort)6;
             byte[] data = new byte[Length];
             int index = 0;
 
@@ -93,7 +94,10 @@ namespace LegoBluetooth
             data[index++] = (byte)MessageType;
             data[index++] = (byte)AlertType;
             data[index++] = (byte)AlertOperation;
-            data[index++] = (byte)AlertPayload;
+            if (AlertPayload != HubAlertPayload.NoStatus)
+            {
+                data[index++] = (byte)AlertPayload;
+            }
 
             Message = data;
 

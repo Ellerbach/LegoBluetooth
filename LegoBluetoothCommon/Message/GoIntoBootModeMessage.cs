@@ -19,11 +19,12 @@ namespace LegoBluetooth
         /// <summary>
         /// Initializes a new instance of the <see cref="GoIntoBootModeMessage"/> class.
         /// </summary>
-        /// <param name="length">The length of the entire message in bytes.</param>
         /// <param name="hubID">The Hub ID.</param>
-        public GoIntoBootModeMessage(ushort length, byte hubID)
-            : base(length, hubID, MessageType.FWUpdateGoIntoBootMode)
+        public GoIntoBootModeMessage(byte hubID)
+            : base(hubID, MessageType.FWUpdateGoIntoBootMode)
         {
+            // Section 5.1
+            Length = 12;
         }
 
         /// <summary>
@@ -37,7 +38,7 @@ namespace LegoBluetooth
             {
                 throw new ArgumentException("Invalid data array. Must contain at least 12 bytes.", nameof(data));
             }
-           
+
             string safetyString = Encoding.UTF8.GetString(data, 3, 9);
 
             if (safetyString != SafetyString)
@@ -45,9 +46,10 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid safety string.", nameof(data));
             }
 
-            return new GoIntoBootModeMessage((ushort)data.Length, data[1])
+            return new GoIntoBootModeMessage(data[1])
             {
                 Message = data,
+                Length = 12,
             };
         }
 
@@ -57,25 +59,13 @@ namespace LegoBluetooth
         /// <returns>A byte array representing the GoIntoBootModeMessage.</returns>
         public override byte[] ToByteArray()
         {
-            byte[] data;
+            byte[] data = new byte[Length];
             int index = 0;
 
-            if (Length < 127)
-            {
-                data = new byte[Length + 1];
-                data[index++] = (byte)Length;
-            }
-            else
-            {
-                data = new byte[Length + 2];
-                data[index++] = (byte)((Length >> 8) | 0x80);
-                data[index++] = (byte)(Length & 0xFF);
-            }
-
+            data[index++] = (byte)Length;
             data[index++] = HubID;
             data[index++] = (byte)MessageType;
             Array.Copy(System.Text.Encoding.UTF8.GetBytes(SafetyString), 0, data, index, 9);
-            index += 9;
 
             Message = data;
 

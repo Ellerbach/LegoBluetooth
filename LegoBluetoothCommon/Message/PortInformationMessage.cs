@@ -48,7 +48,6 @@ namespace LegoBluetooth
         /// <summary>
         /// Initializes a new instance of the <see cref="PortInformationMessage"/> class.
         /// </summary>
-        /// <param name="length">The length of the entire message in bytes.</param>
         /// <param name="hubID">The Hub ID.</param>
         /// <param name="portID">The Port ID.</param>
         /// <param name="informationType">The information type.</param>
@@ -57,9 +56,10 @@ namespace LegoBluetooth
         /// <param name="inputModes">The available input port modes for MODE INFO.</param>
         /// <param name="outputModes">The available output port modes for MODE INFO.</param>
         /// <param name="modeCombinations">The mode combinations for POSSIBLE MODE COMBINATIONS.</param>
-        public PortInformationMessage(ushort length, byte hubID, byte portID, InformationType informationType, byte capabilities, byte totalModeCount, ushort inputModes, ushort outputModes, ushort[] modeCombinations)
-            : base(length, hubID, MessageType.PortInformation)
+        public PortInformationMessage(byte hubID, byte portID, InformationType informationType, byte capabilities, byte totalModeCount, ushort inputModes, ushort outputModes, ushort[] modeCombinations)
+            : base(hubID, MessageType.PortInformation)
         {
+            // Section 3.19
             PortID = portID;
             InformationType = informationType;
             Capabilities = capabilities;
@@ -76,9 +76,9 @@ namespace LegoBluetooth
         /// <returns>A <see cref="PortInformationMessage"/> instance.</returns>
         public static new PortInformationMessage Decode(byte[] data)
         {
-            if (data == null || data.Length < 11)
+            if (data == null || data.Length < 7)
             {
-                throw new ArgumentException("Invalid data array. Must contain at least 11 bytes.", nameof(data));
+                throw new ArgumentException("Invalid data array. Must contain at least 7 bytes.", nameof(data));
             }
 
             byte portID = data[3];
@@ -91,9 +91,10 @@ namespace LegoBluetooth
                 ushort inputModes = BitConverter.ToUInt16(data, 7);
                 ushort outputModes = BitConverter.ToUInt16(data, 9);
 
-                return new PortInformationMessage((ushort)data.Length, data[1], portID, informationType, capabilities, totalModeCount, inputModes, outputModes, null)
+                return new PortInformationMessage(data[1], portID, informationType, capabilities, totalModeCount, inputModes, outputModes, null)
                 {
                     Message = data,
+                    Length = data[0],
                 };
             }
             else if (informationType == InformationType.PossibleModeCombinations)
@@ -105,9 +106,10 @@ namespace LegoBluetooth
                     modeCombinations[i] = BitConverter.ToUInt16(data, 5 + i * 2);
                 }
 
-                return new PortInformationMessage((ushort)data.Length, data[1], portID, informationType, 0, 0, 0, 0, modeCombinations)
+                return new PortInformationMessage(data[1], portID, informationType, 0, 0, 0, 0, modeCombinations)
                 {
                     Message = data,
+                    Length = data[0],
                 };
             }
             else
@@ -122,21 +124,19 @@ namespace LegoBluetooth
         /// <returns>A byte array representing the PortInformationMessage.</returns>
         public override byte[] ToByteArray()
         {
-            byte[] data;
+            if (InformationType == InformationType.ModeInfo)
+            {
+                Length = 11;
+            }
+            else if (InformationType == InformationType.PossibleModeCombinations)
+            {
+                Length = (ushort)(5 + (ModeCombinations != null ? ModeCombinations.Length : 0) * 2);
+            }
+
+            byte[] data = new byte[Length];
             int index = 0;
 
-            if (Length < 127)
-            {
-                data = new byte[Length + 1];
-                data[index++] = (byte)Length;
-            }
-            else
-            {
-                data = new byte[Length + 2];
-                data[index++] = (byte)((Length >> 8) | 0x80);
-                data[index++] = (byte)(Length & 0xFF);
-            }
-
+            data[index++] = (byte)Length;
             data[index++] = HubID;
             data[index++] = (byte)MessageType;
             data[index++] = PortID;
@@ -175,9 +175,12 @@ namespace LegoBluetooth
         public override string ToString()
         {
             string ret = $"{base.ToString()}, PortID: {PortID}, InformationType: {InformationType}, Capabilities: {Capabilities}, TotalModeCount: {TotalModeCount}, InputModes: {InputModes}, OutputModes: {OutputModes}, ModeCombinations: ";
-            for (int i = 0; i < ModeCombinations.Length; i++)
+            if (ModeCombinations != null)
             {
-                ret += $"{ModeCombinations[i]} ";
+                for (int i = 0; i < ModeCombinations.Length; i++)
+                {
+                    ret += $"{ModeCombinations[i]} ";
+                }
             }
 
             return ret;

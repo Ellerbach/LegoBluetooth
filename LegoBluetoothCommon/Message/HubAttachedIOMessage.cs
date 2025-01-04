@@ -55,7 +55,6 @@ namespace LegoBluetooth
         /// <summary>
         /// Initializes a new instance of the <see cref="HubAttachedIOMessage"/> class.
         /// </summary>
-        /// <param name="length">The length of the entire message in bytes.</param>
         /// <param name="hubID">The Hub ID.</param>
         /// <param name="portID">The Port ID.</param>
         /// <param name="event">The I/O event.</param>
@@ -64,9 +63,10 @@ namespace LegoBluetooth
         /// <param name="softwareRevision">The software revision.</param>
         /// <param name="portIDA">The first Port ID forming the Virtual I/O.</param>
         /// <param name="portIDB">The second Port ID forming the Virtual I/O.</param>
-        public HubAttachedIOMessage(ushort length, byte hubID, byte portID, IOEvent @event, IOTypeID ioTypeID, Version hardwareRevision, Version softwareRevision, byte portIDA, byte portIDB)
-            : base(length, hubID, MessageType.HubAttachedIO)
+        public HubAttachedIOMessage(byte hubID, byte portID, IOEvent @event, IOTypeID ioTypeID, Version hardwareRevision, Version softwareRevision, byte portIDA, byte portIDB)
+            : base(hubID, MessageType.HubAttachedIO)
         {
+            // Section 3.8
             PortID = portID;
             Event = @event;
             IOTypeID = ioTypeID;
@@ -93,7 +93,11 @@ namespace LegoBluetooth
 
             if (@event == IOEvent.DetachedIO)
             {
-                return new HubAttachedIOMessage((ushort)data.Length, data[1], portID, @event, 0, VersionNumberEncoder.Decode(0), VersionNumberEncoder.Decode(0), 0, 0);
+                return new HubAttachedIOMessage(data[1], portID, @event, 0, VersionNumberEncoder.Decode(0), VersionNumberEncoder.Decode(0), 0, 0)
+                {
+                    Message = data,
+                    Length = data[0],
+                };
             }
             else if (@event == IOEvent.AttachedIO)
             {
@@ -106,7 +110,11 @@ namespace LegoBluetooth
                 int hardwareRevision = BitConverter.ToInt32(data, 7);
                 int softwareRevision = BitConverter.ToInt32(data, 11);
 
-                return new HubAttachedIOMessage((ushort)data.Length, data[1], portID, @event, ioTypeID, VersionNumberEncoder.Decode(hardwareRevision), VersionNumberEncoder.Decode(softwareRevision), 0, 0);
+                return new HubAttachedIOMessage(data[1], portID, @event, ioTypeID, VersionNumberEncoder.Decode(hardwareRevision), VersionNumberEncoder.Decode(softwareRevision), 0, 0)
+                {
+                    Message = data,
+                    Length = data[0],
+                };
             }
             else if (@event == IOEvent.AttachedVirtualIO)
             {
@@ -119,7 +127,11 @@ namespace LegoBluetooth
                 byte portIDA = data[7];
                 byte portIDB = data[8];
 
-                return new HubAttachedIOMessage((ushort)data.Length, data[1], portID, @event, ioTypeID, new Version(0, 0), new Version(0, 0), portIDA, portIDB);
+                return new HubAttachedIOMessage(data[1], portID, @event, ioTypeID, new Version(0, 0), new Version(0, 0), portIDA, portIDB)
+                {
+                    Message = data,
+                    Length = data[0],
+                };
             }
             else
             {
@@ -133,21 +145,27 @@ namespace LegoBluetooth
         /// <returns>A byte array representing the HubAttachedIOMessage.</returns>
         public override byte[] ToByteArray()
         {
-            byte[] data;
+            // Length, HubID, MessageType, PortID, Event
+            int baseLength = 5;
+            int additionalLength = 0;
+
+            if (Event == IOEvent.AttachedIO)
+            {
+                // IOTypeID (2 bytes), HardwareRevision (4 bytes), SoftwareRevision (4 bytes)
+                additionalLength = 2 + 4 + 4;
+            }
+            else if (Event == IOEvent.AttachedVirtualIO)
+            {
+                // IOTypeID (2 bytes), PortIDA (1 byte), PortIDB (1 byte)
+                additionalLength = 2 + 1 + 1;
+            }
+
+            Length = (ushort)(baseLength + additionalLength);
+
+            byte[] data = new byte[Length];
             int index = 0;
 
-            if (Length < 127)
-            {
-                data = new byte[Length + 1];
-                data[index++] = (byte)Length;
-            }
-            else
-            {
-                data = new byte[Length + 2];
-                data[index++] = (byte)((Length >> 8) | 0x80);
-                data[index++] = (byte)(Length & 0xFF);
-            }
-
+            data[index++] = (byte)Length;
             data[index++] = HubID;
             data[index++] = (byte)MessageType;
             data[index++] = PortID;

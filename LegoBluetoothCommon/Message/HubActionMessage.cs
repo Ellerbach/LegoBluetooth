@@ -16,18 +16,19 @@ namespace LegoBluetooth
         /// <remarks>
         /// Identifies the property subject to the performed operation.
         /// </remarks>
-        public byte ActionType { get; set; }
+        public ActionType ActionType { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HubActionMessage"/> class.
         /// </summary>
-        /// <param name="length">The length of the entire message in bytes.</param>
         /// <param name="hubID">The Hub ID.</param>
         /// <param name="actionType">The action type.</param>
-        public HubActionMessage(ushort length, byte hubID, byte actionType)
-            : base(length, hubID, MessageType.HubActions)
+        public HubActionMessage(byte hubID, ActionType actionType)
+            : base(hubID, MessageType.HubActions)
         {
+            // Section 3.6
             ActionType = actionType;
+            Length = 4;
         }
 
         /// <summary>
@@ -44,9 +45,10 @@ namespace LegoBluetooth
 
             byte actionType = data[3];
 
-            return new HubActionMessage((ushort)data.Length, data[1], actionType)
+            return new HubActionMessage(data[1], (ActionType)actionType)
             {
                 Message = data,
+                Length = 4
             };
         }
 
@@ -55,25 +57,14 @@ namespace LegoBluetooth
         /// </summary>
         /// <returns>A byte array representing the HubActionMessage.</returns>
         public override byte[] ToByteArray()
-        {
-            byte[] data;
+        {            
+            byte[] data = new byte[Length];
             int index = 0;
 
-            if (Length < 127)
-            {
-                data = new byte[Length + 1];
-                data[index++] = (byte)Length;
-            }
-            else
-            {
-                data = new byte[Length + 2];
-                data[index++] = (byte)((Length >> 8) | 0x80);
-                data[index++] = (byte)(Length & 0xFF);
-            }
-
+            data[index++] = (byte)Length;
             data[index++] = HubID;
             data[index++] = (byte)MessageType;
-            data[index++] = ActionType;
+            data[index++] = (byte)ActionType;
 
             Message = data;
 

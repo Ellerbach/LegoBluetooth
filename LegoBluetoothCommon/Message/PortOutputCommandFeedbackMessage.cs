@@ -12,22 +12,6 @@ namespace LegoBluetooth
     public class PortOutputCommandFeedbackMessage : CommonMessageHeader
     {
         /// <summary>
-        /// Represents a port feedback entry.
-        /// </summary>
-        public class PortFeedbackEntry
-        {
-            /// <summary>
-            /// Gets or sets the Port ID for the feedback message.
-            /// </summary>
-            public byte PortID { get; set; }
-
-            /// <summary>
-            /// Gets or sets the feedback message as bit-fields.
-            /// </summary>
-            public FeedbackMessage Feedback { get; set; }
-        }
-
-        /// <summary>
         /// Gets or sets the list of port feedback entries.
         /// </summary>
         public ArrayList PortFeedbacks { get; set; }
@@ -35,11 +19,11 @@ namespace LegoBluetooth
         /// <summary>
         /// Initializes a new instance of the <see cref="PortOutputCommandFeedbackMessage"/> class.
         /// </summary>
-        /// <param name="length">The length of the entire message in bytes.</param>
         /// <param name="hubID">The Hub ID.</param>
-        public PortOutputCommandFeedbackMessage(ushort length, byte hubID)
-            : base(length, hubID, MessageType.PortOutputCommandFeedback)
+        public PortOutputCommandFeedbackMessage(byte hubID)
+            : base(hubID, MessageType.PortOutputCommandFeedback)
         {
+            // Section 3.32
             PortFeedbacks = new ArrayList();
         }
 
@@ -55,9 +39,11 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid data array. Must contain at least 5 bytes.", nameof(data));
             }
 
-            var message = new PortOutputCommandFeedbackMessage((ushort)data.Length, data[1])
+            var message = new PortOutputCommandFeedbackMessage(data[1])
             {
                 Message = data,
+                // That may not be correct and much more can be placed here
+                Length = data[0]
             };
 
             int index = 3;
@@ -83,6 +69,8 @@ namespace LegoBluetooth
         public override byte[] ToByteArray()
         {
             ArrayList data = new ArrayList();
+
+            Length = (ushort)(3 + (PortFeedbacks.Count * 2));
 
             if (Length < 127)
             {

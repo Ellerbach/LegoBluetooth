@@ -37,14 +37,14 @@ namespace LegoBluetooth
         /// <summary>
         /// Initializes a new instance of the <see cref="HubPropertyMessage"/> class.
         /// </summary>
-        /// <param name="length">The length of the entire message in bytes.</param>
         /// <param name="hubID">The Hub ID.</param>
         /// <param name="property">The Hub Property.</param>
         /// <param name="operation">The Hub Property Operation.</param>
         /// <param name="payload">The payload of the message.</param>
-        public HubPropertyMessage(ushort length, byte hubID, HubProperty property, HubPropertyOperation operation, byte[] payload)
-            : base(length, hubID, MessageType.HubProperties)
+        public HubPropertyMessage(byte hubID, HubProperty property, HubPropertyOperation operation, byte[] payload)
+            : base(hubID, MessageType.HubProperties)
         {
+            // Section 3.5
             Property = property;
             Operation = operation;
             Payload = payload;
@@ -91,7 +91,11 @@ namespace LegoBluetooth
                 Array.Copy(data, index, payload, 0, length - 5);
             }
 
-            return new HubPropertyMessage(length, hubID, property, operation, payload);
+            return new HubPropertyMessage(hubID, property, operation, payload)
+            {
+                Message = data,
+                Length = length
+            };
         }
 
         /// <summary>

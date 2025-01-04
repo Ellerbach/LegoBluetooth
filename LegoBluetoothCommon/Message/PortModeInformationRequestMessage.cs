@@ -28,17 +28,18 @@ namespace LegoBluetooth
         /// <summary>
         /// Initializes a new instance of the <see cref="PortModeInformationRequestMessage"/> class.
         /// </summary>
-        /// <param name="length">The length of the entire message in bytes.</param>
         /// <param name="hubID">The Hub ID.</param>
         /// <param name="portID">The Port ID.</param>
         /// <param name="mode">The mode to get information for.</param>
         /// <param name="informationType">The mode information type.</param>
-        public PortModeInformationRequestMessage(ushort length, byte hubID, byte portID, byte mode, ModeInformationType informationType)
-            : base(length, hubID, MessageType.PortModeInformation)
+        public PortModeInformationRequestMessage(byte hubID, byte portID, byte mode, ModeInformationType informationType)
+            : base(hubID, MessageType.PortModeInformationRequest)
         {
+            // Section 3.16
             PortID = portID;
             Mode = mode;
             InformationType = informationType;
+            Length = 6;
         }
 
         /// <summary>
@@ -57,9 +58,10 @@ namespace LegoBluetooth
             byte mode = data[4];
             ModeInformationType informationType = (ModeInformationType)data[5];
 
-            return new PortModeInformationRequestMessage((ushort)data.Length, data[1], portID, mode, informationType)
+            return new PortModeInformationRequestMessage(data[1], portID, mode, informationType)
             {
                 Message = data,
+                Length = data[0],
             };
         }
 
@@ -69,21 +71,12 @@ namespace LegoBluetooth
         /// <returns>A byte array representing the PortModeInformationRequestMessage.</returns>
         public override byte[] ToByteArray()
         {
-            byte[] data;
+            Length = 6;
+
+            byte[] data = new byte[Length];
             int index = 0;
 
-            if (Length < 127)
-            {
-                data = new byte[Length + 1];
-                data[index++] = (byte)Length;
-            }
-            else
-            {
-                data = new byte[Length + 2];
-                data[index++] = (byte)((Length >> 8) | 0x80);
-                data[index++] = (byte)(Length & 0xFF);
-            }
-
+            data[index++] = (byte)Length;
             data[index++] = HubID;
             data[index++] = (byte)MessageType;
             data[index++] = PortID;

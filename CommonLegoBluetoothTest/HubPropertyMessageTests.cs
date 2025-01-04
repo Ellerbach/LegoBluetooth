@@ -1,0 +1,41 @@
+// Licensed to Laurent Ellerbach under one or more agreements.
+// Laurent Ellerbach licenses this file to you under the MIT license.
+
+using System;
+using LegoBluetooth;
+#if NANOFRAMEWORK_1_0
+using nanoFramework.TestFramework;
+#endif
+
+namespace CommonLegoBluetoothTest
+{
+    [TestClass]
+    public class HubPropertyMessageTests
+    {
+        [TestMethod]
+        [DataRow(new byte[] { 0x09, 0x00, 0x01, 0x04, 0x06, 0x00, 0x00, 0x00, 0x10 })]
+        [DataRow(new byte[] { 0x05, 0x00, 0x01, 0x03, 0x05 })]
+        [DataRow(new byte[] { 0x09, 0x00, 0x01, 0x03, 0x06, 0x00, 0x00, 0x00, 0x10 })]
+        [DataRow(new byte[] { 0x05, 0x00, 0x01, 0x09, 0x05 })]
+        [DataRow(new byte[] { 0x0A, 0x00, 0x01, 0x09, 0x06, 0x37, 0x2E, 0x32, 0x2E, 0x63 })]
+        [DataRow(new byte[] { 0x05, 0x00, 0x01, 0x08, 0x05 })]
+        [DataRow(new byte[] { 0x14, 0x00, 0x01, 0x08, 0x06, 0x4C, 0x45, 0x47, 0x4F, 0x20, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6D, 0x20, 0x41, 0x2F, 0x53 })]
+        [DataRow(new byte[] { 0x05, 0x00, 0x01, 0x07, 0x05 })]
+        [DataRow(new byte[] { 0x06, 0x00, 0x01, 0x07, 0x06, 0x00 })]
+        [DataRow(new byte[] { 0x05, 0x00, 0x01, 0x0A, 0x05 })]
+        public void Decode_ShouldHandleVariousData(byte[] data)
+        {
+            // Act
+            var message = HubPropertyMessage.Decode(data);
+
+            // Assert
+            Assert.IsNotNull(message);
+
+            // Act again to test the ToByteArray method
+            var result = message.ToByteArray();
+
+            // Assert
+            CollectionAssert.AreEqual(data, result);
+        }
+    }
+}

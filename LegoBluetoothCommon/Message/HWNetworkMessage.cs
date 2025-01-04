@@ -23,13 +23,13 @@ namespace LegoBluetooth
         /// <summary>
         /// Initializes a new instance of the <see cref="HWNetworkMessage"/> class.
         /// </summary>
-        /// <param name="length">The length of the entire message in bytes.</param>
         /// <param name="hubID">The Hub ID.</param>
         /// <param name="commandType">The H/W Network command type.</param>
         /// <param name="payload">The payload for the H/W Network message.</param>
-        public HWNetworkMessage(ushort length, byte hubID, HWNetworkCommandType commandType, byte payload)
-            : base(length, hubID, MessageType.HWNetworkCommands)
+        public HWNetworkMessage(byte hubID, HWNetworkCommandType commandType, byte payload)
+            : base(hubID, MessageType.HWNetworkCommands)
         {
+            // Section 3.10
             CommandType = commandType;
             Payload = payload;
         }
@@ -41,17 +41,24 @@ namespace LegoBluetooth
         /// <returns>A <see cref="HWNetworkMessage"/> instance.</returns>
         public static new HWNetworkMessage Decode(byte[] data)
         {
-            if (data == null || data.Length < 5)
+            if (data == null || data.Length < 4)
             {
                 throw new ArgumentException("Invalid data array. Must contain at least 5 bytes.", nameof(data));
             }
 
             HWNetworkCommandType commandType = (HWNetworkCommandType)data[3];
-            byte payload = data[4];
+            byte payload = 0;
 
-            return new HWNetworkMessage((ushort)data.Length, data[1], commandType, payload)
+            // Size is either 4 or 5 bytes. If it's 5, the 5th byte is the payload.
+            if (data.Length > 4)
+            {
+                payload = data[4];
+            }
+
+            return new HWNetworkMessage(data[1], commandType, payload)
             {
                 Message = data,
+                Length = data[0],
             };
         }
 
@@ -61,25 +68,39 @@ namespace LegoBluetooth
         /// <returns>A byte array representing the HubPropertyMessage.</returns>
         public override byte[] ToByteArray()
         {
-            byte[] data;
+            switch (CommandType)
+            {
+                case HWNetworkCommandType.ConnectionRequest:
+                case HWNetworkCommandType.FamilySet:
+                case HWNetworkCommandType.Family:
+                case HWNetworkCommandType.SubFamily:
+                case HWNetworkCommandType.SubFamilySet:
+                case HWNetworkCommandType.ExtendedFamily:
+                    Length = 5;
+                    break;
+                case HWNetworkCommandType.FamilyRequest:
+                case HWNetworkCommandType.GetSubFamily:
+                case HWNetworkCommandType.ExtendedFamilySet:
+                case HWNetworkCommandType.GetFamily:
+                case HWNetworkCommandType.GetExtendedFamily:
+                case HWNetworkCommandType.ResetLongPressTiming:
+                case HWNetworkCommandType.JoinDenied:
+                default:
+                    Length = 4;
+                    break;
+            }
+
+            byte[] data = new byte[Length];
             int index = 0;
 
-            if (Length < 127)
-            {
-                data = new byte[Length + 1];
-                data[index++] = (byte)Length;
-            }
-            else
-            {
-                data = new byte[Length + 2];
-                data[index++] = (byte)((Length >> 8) | 0x80);
-                data[index++] = (byte)(Length & 0xFF);
-            }
-
+            data[index++] = (byte)Length;
             data[index++] = HubID;
             data[index++] = (byte)MessageType;
             data[index++] = (byte)CommandType;
-            data[index++] = Payload;
+            if (Length >= 5)
+            {
+                data[index++] = Payload;
+            }
 
             Message = data;
 

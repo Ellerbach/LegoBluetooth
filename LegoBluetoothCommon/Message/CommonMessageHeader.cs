@@ -6,7 +6,7 @@ using System;
 namespace LegoBluetooth
 {
     /// <summary>
-    /// Represents the common message header for all messages in the LEGO Hub Characteristic (UUID: 1624).
+    /// Represents the common message header for all messages in the LEGO Hub Characteristic.
     /// </summary>
     public class CommonMessageHeader
     {
@@ -39,17 +39,16 @@ namespace LegoBluetooth
         /// <summary>
         /// Gets or sets the payload of the message.
         /// </summary>
-        public byte[] Message { get; set; }
+        public byte[] Message { get; set; } = new byte[0];
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommonMessageHeader"/> class.
         /// </summary>
-        /// <param name="length">The length of the entire message in bytes.</param>
         /// <param name="hubID">The Hub ID.</param>
         /// <param name="messageType">The message type.</param>
-        public CommonMessageHeader(ushort length, byte hubID, MessageType messageType)
+        public CommonMessageHeader(byte hubID, MessageType messageType)
         {
-            Length = length;
+            // Section 3.1
             HubID = hubID;
             MessageType = messageType;
         }
@@ -133,9 +132,10 @@ namespace LegoBluetooth
                 case MessageType.FWUpdateLockMemory:
                 case MessageType.FWLockStatus:
                 default:
-                    return new CommonMessageHeader(length, hubID, (MessageType)messageType)
+                    return new CommonMessageHeader(hubID, (MessageType)messageType)
                     {
                         Message = data,
+                        Length = length
                     };
             }
         }

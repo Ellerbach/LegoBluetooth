@@ -21,11 +21,6 @@ namespace LegoBluetooth
         public byte CombinedControlByte { get; set; }
 
         /// <summary>
-        /// Gets or sets the used combination index.
-        /// </summary>
-        public byte UsedCombinationIndex { get; set; }
-
-        /// <summary>
         /// Gets or sets the mode/dataset combination bit pointer.
         /// </summary>
         public ushort ModeDatasetCombinationBitPointer { get; set; }
@@ -33,19 +28,18 @@ namespace LegoBluetooth
         /// <summary>
         /// Initializes a new instance of the <see cref="PortInputFormatCombinedModeMessage"/> class.
         /// </summary>
-        /// <param name="length">The length of the entire message in bytes.</param>
         /// <param name="hubID">The Hub ID.</param>
         /// <param name="portID">The Port ID.</param>
         /// <param name="combinedControlByte">The combined control byte.</param>
-        /// <param name="usedCombinationIndex">The used combination index.</param>
         /// <param name="modeDatasetCombinationBitPointer">The mode/dataset combination bit pointer.</param>
-        public PortInputFormatCombinedModeMessage(ushort length, byte hubID, byte portID, byte combinedControlByte, byte usedCombinationIndex, ushort modeDatasetCombinationBitPointer)
-            : base(length, hubID, MessageType.PortInputFormatCombinedMode)
+        public PortInputFormatCombinedModeMessage(byte hubID, byte portID, byte combinedControlByte, ushort modeDatasetCombinationBitPointer)
+            : base(hubID, MessageType.PortInputFormatCombinedMode)
         {
+            // Section 3.24
             PortID = portID;
             CombinedControlByte = combinedControlByte;
-            UsedCombinationIndex = usedCombinationIndex;
             ModeDatasetCombinationBitPointer = modeDatasetCombinationBitPointer;
+            Length = 7;
         }
 
         /// <summary>
@@ -62,12 +56,12 @@ namespace LegoBluetooth
 
             byte portID = data[3];
             byte combinedControlByte = data[4];
-            byte usedCombinationIndex = data[5];
-            ushort modeDatasetCombinationBitPointer = BitConverter.ToUInt16(data, 6);
+            ushort modeDatasetCombinationBitPointer = BitConverter.ToUInt16(data, 5);
 
-            return new PortInputFormatCombinedModeMessage((ushort)data.Length, data[1], portID, combinedControlByte, usedCombinationIndex, modeDatasetCombinationBitPointer)
+            return new PortInputFormatCombinedModeMessage(data[1], portID, combinedControlByte, modeDatasetCombinationBitPointer)
             {
                 Message = data,
+                Length = data[0],
             };
         }
 
@@ -77,26 +71,15 @@ namespace LegoBluetooth
         /// <returns>A byte array representing the PortInputFormatCombinedModeMessage.</returns>
         public override byte[] ToByteArray()
         {
-            byte[] data;
+            Length = 7;
+            byte[] data = new byte[Length];
             int index = 0;
 
-            if (Length < 127)
-            {
-                data = new byte[Length + 1];
-                data[index++] = (byte)Length;
-            }
-            else
-            {
-                data = new byte[Length + 2];
-                data[index++] = (byte)((Length >> 8) | 0x80);
-                data[index++] = (byte)(Length & 0xFF);
-            }
-
+            data[index++] = (byte)Length;
             data[index++] = HubID;
             data[index++] = (byte)MessageType;
             data[index++] = PortID;
             data[index++] = CombinedControlByte;
-            data[index++] = UsedCombinationIndex;
             Array.Copy(BitConverter.GetBytes(ModeDatasetCombinationBitPointer), 0, data, index, 2);
 
             Message = data;
@@ -110,7 +93,7 @@ namespace LegoBluetooth
         /// <returns>A string representation of the port input format (combined mode) message.</returns>
         public override string ToString()
         {
-            return $"{base.ToString()}, PortID: {PortID}, CombinedControlByte: {CombinedControlByte}, UsedCombinationIndex: {UsedCombinationIndex}, ModeDatasetCombinationBitPointer: {ModeDatasetCombinationBitPointer}";
+            return $"{base.ToString()}, PortID: {PortID}, CombinedControlByte: {CombinedControlByte}, ModeDatasetCombinationBitPointer: {ModeDatasetCombinationBitPointer}";
         }
     }
 }

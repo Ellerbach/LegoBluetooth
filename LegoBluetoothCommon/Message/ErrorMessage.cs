@@ -23,15 +23,16 @@ namespace LegoBluetooth
         /// <summary>
         /// Initializes a new instance of the <see cref="ErrorMessage"/> class.
         /// </summary>
-        /// <param name="length">The length of the entire message in bytes.</param>
         /// <param name="hubID">The Hub ID.</param>
         /// <param name="commandType">The command type that introduced this message.</param>
         /// <param name="errorCode">The error code introduced by the command.</param>
-        public ErrorMessage(ushort length, byte hubID, byte commandType, ErrorCode errorCode)
-            : base(length, hubID, MessageType.GenericErrorMessages)
+        public ErrorMessage(byte hubID, byte commandType, ErrorCode errorCode)
+            : base(hubID, MessageType.GenericErrorMessages)
         {
+            // Section 3.9
             CommandType = commandType;
             ErrorCode = errorCode;
+            Length = 5;
         }
 
         /// <summary>
@@ -49,9 +50,10 @@ namespace LegoBluetooth
             byte commandType = data[3];
             ErrorCode errorCode = (ErrorCode)data[4];
 
-            return new ErrorMessage((ushort)data.Length, data[1], commandType, errorCode)
+            return new ErrorMessage(data[1], commandType, errorCode)
             {
                 Message = data,
+                Length = 5,
             };
         }
 
@@ -60,22 +62,11 @@ namespace LegoBluetooth
         /// </summary>
         /// <returns>A byte array representing the ErrorMessage.</returns>
         public override byte[] ToByteArray()
-        {
-            byte[] data;
+        {            
+            byte[] data = new byte[Length];
             int index = 0;
 
-            if (Length < 127)
-            {
-                data = new byte[Length + 1];
-                data[index++] = (byte)Length;
-            }
-            else
-            {
-                data = new byte[Length + 2];
-                data[index++] = (byte)((Length >> 8) | 0x80);
-                data[index++] = (byte)(Length & 0xFF);
-            }
-
+            data[index++] = (byte)Length;
             data[index++] = HubID;
             data[index++] = (byte)MessageType;
             data[index++] = CommandType;

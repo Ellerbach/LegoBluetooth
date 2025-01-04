@@ -33,15 +33,15 @@ namespace LegoBluetooth
         /// <summary>
         /// Initializes a new instance of the <see cref="PortOutputCommandMessage"/> class.
         /// </summary>
-        /// <param name="length">The length of the entire message in bytes.</param>
         /// <param name="hubID">The Hub ID.</param>
         /// <param name="portID">The Port ID.</param>
         /// <param name="startupCompletion">The startup and completion information.</param>
         /// <param name="subCommand">The sub-command to execute.</param>
         /// <param name="payload">The payload for the sub-command.</param>
-        public PortOutputCommandMessage(ushort length, byte hubID, byte portID, StartupCompletionInfo startupCompletion, SubCommandType subCommand, byte[] payload)
-            : base(length, hubID, MessageType.PortOutputCommand)
+        public PortOutputCommandMessage(byte hubID, byte portID, StartupCompletionInfo startupCompletion, SubCommandType subCommand, byte[] payload)
+            : base(hubID, MessageType.PortOutputCommand)
         {
+            // Section 3.26
             PortID = portID;
             StartupCompletion = startupCompletion;
             SubCommand = subCommand;
@@ -60,15 +60,21 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid data array. Must contain at least 6 bytes.", nameof(data));
             }
 
-            byte portID = data[3];
-            StartupCompletionInfo startupCompletion = (StartupCompletionInfo)data[4];
-            SubCommandType subCommand = (SubCommandType)data[5];
-            byte[] payload = new byte[data.Length - 6];
-            Array.Copy(data, 6, payload, 0, payload.Length);
+            int index = data.Length > 127 ? 2 : 1;
+            byte hubId = data[index++];
+            // Skipping command type
+            index++;
+            byte portID = data[index++];
+            StartupCompletionInfo startupCompletion = (StartupCompletionInfo)data[index++];
+            SubCommandType subCommand = (SubCommandType)data[index++];
+            byte[] payload = new byte[data.Length - index];
+            Array.Copy(data, index, payload, 0, payload.Length);
 
-            return new PortOutputCommandMessage((ushort)data.Length, data[1], portID, startupCompletion, subCommand, payload)
+            return new PortOutputCommandMessage(hubId, portID, startupCompletion, subCommand, payload)
             {
                 Message = data,
+                // Using data.Length to avoid computing Length even if may not be correct
+                Length = (ushort)data.Length,
             };
         }
 
@@ -78,17 +84,19 @@ namespace LegoBluetooth
         /// <returns>A byte array representing the PortOutputCommandMessage.</returns>
         public override byte[] ToByteArray()
         {
+            Length = (ushort)(6 + Payload.Length);
+
             byte[] data;
             int index = 0;
 
             if (Length < 127)
             {
-                data = new byte[Length + 1 + Payload.Length];
+                data = new byte[Length];
                 data[index++] = (byte)Length;
             }
             else
             {
-                data = new byte[Length + 2 + Payload.Length];
+                data = new byte[Length + 1];
                 data[index++] = (byte)((Length >> 8) | 0x80);
                 data[index++] = (byte)(Length & 0xFF);
             }

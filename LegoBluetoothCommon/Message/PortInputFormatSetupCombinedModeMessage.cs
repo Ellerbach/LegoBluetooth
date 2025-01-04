@@ -33,15 +33,15 @@ namespace LegoBluetooth
         /// <summary>
         /// Initializes a new instance of the <see cref="PortInputFormatSetupCombinedModeMessage"/> class.
         /// </summary>
-        /// <param name="length">The length of the entire message in bytes.</param>
         /// <param name="hubID">The Hub ID.</param>
         /// <param name="portID">The Port ID.</param>
         /// <param name="subCommand">The sub-command for Port Input Format Setup.</param>
         /// <param name="combinationIndex">The combination index for the LPF2 device.</param>
         /// <param name="modeDataSetCombinations">The mode and dataset combinations.</param>
-        public PortInputFormatSetupCombinedModeMessage(ushort length, byte hubID, byte portID, PortInputFormatSetupSubCommand subCommand, byte combinationIndex, byte[] modeDataSetCombinations)
-            : base(length, hubID, MessageType.PortInputFormatSetupCombinedMode)
+        public PortInputFormatSetupCombinedModeMessage(byte hubID, byte portID, PortInputFormatSetupSubCommand subCommand, byte combinationIndex, byte[] modeDataSetCombinations)
+            : base(hubID, MessageType.PortInputFormatSetupCombinedMode)
         {
+            // Section 3.18
             PortID = portID;
             SubCommand = subCommand;
             CombinationIndex = combinationIndex;
@@ -74,16 +74,18 @@ namespace LegoBluetooth
                 byte[] modeDataSetCombinations = new byte[data.Length - 6];
                 Array.Copy(data, 6, modeDataSetCombinations, 0, modeDataSetCombinations.Length);
 
-                return new PortInputFormatSetupCombinedModeMessage((ushort)data.Length, data[1], portID, subCommand, combinationIndex, modeDataSetCombinations)
+                return new PortInputFormatSetupCombinedModeMessage(data[1], portID, subCommand, combinationIndex, modeDataSetCombinations)
                 {
                     Message = data,
+                    Length = data[0],
                 };
             }
             else
             {
-                return new PortInputFormatSetupCombinedModeMessage((ushort)data.Length, data[1], portID, subCommand, 0, null)
+                return new PortInputFormatSetupCombinedModeMessage(data[1], portID, subCommand, 0, null)
                 {
                     Message = data,
+                    Length = data[0],
                 };
             }
         }
@@ -94,20 +96,20 @@ namespace LegoBluetooth
         /// <returns>A byte array representing the PortInputFormatSetupCombinedModeMessage.</returns>
         public override byte[] ToByteArray()
         {
-            byte[] data;
-            int index = 0;
+            int baseLength = 5; // Lenght + HubID, MessageType, PortID, SubCommand
+            int additionalLength = 0;
 
-            if (Length < 127)
+            if (SubCommand == PortInputFormatSetupSubCommand.SetModeAndDataSetCombinations)
             {
-                data = new byte[Length + 1];
-                data[index++] = (byte)Length;
+                // CombinationIndex + ModeDataSetCombinations
+                additionalLength = 1 + (ModeDataSetCombinations != null ? ModeDataSetCombinations.Length : 0);
             }
-            else
-            {
-                data = new byte[Length + 2];
-                data[index++] = (byte)((Length >> 8) | 0x80);
-                data[index++] = (byte)(Length & 0xFF);
-            }
+
+            Length = (ushort)(baseLength + additionalLength);
+
+            byte[] data = new byte[Length];
+            int index = 0;
+            data[index++] = (byte)Length;
 
             data[index++] = HubID;
             data[index++] = (byte)MessageType;

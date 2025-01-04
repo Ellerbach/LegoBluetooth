@@ -114,7 +114,7 @@ namespace LegoBluetooth
         {
             if ((prop.Operation == HubPropertyOperation.RequestUpdate) || (prop.Operation == HubPropertyOperation.EnableUpdates))
             {
-                var notify = new HubPropertyMessage(0, 0, prop.Property, HubPropertyOperation.Update, new byte[0]);
+                var notify = new HubPropertyMessage(0, prop.Property, HubPropertyOperation.Update, new byte[0]);
 
                 switch (prop.Property)
                 {
@@ -178,7 +178,7 @@ namespace LegoBluetooth
         {
             if ((alert.AlertOperation == HubAlertOperation.EnableUpdates) || (alert.AlertOperation == HubAlertOperation.RequestUpdates))
             {
-                var notify = new HubAlertMessage(0, 0, alert.AlertType, HubAlertOperation.Update, HubAlertPayload.StatusOK);
+                var notify = new HubAlertMessage(0, alert.AlertType, HubAlertOperation.Update, HubAlertPayload.StatusOK);
                 Bluetooth.NotifyValue(notify.ToByteArray());
 
                 if (alert.AlertOperation == HubAlertOperation.EnableUpdates)
