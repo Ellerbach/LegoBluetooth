@@ -10,6 +10,9 @@ using static LegoBluetooth.IBluetooth;
 
 namespace LegoBluetooth
 {
+    /// <summary>
+    /// Represents a Bluetooth implementation for.NET nanoFramework.
+    /// </summary>
     public class BluetoothNano : IBluetooth
     {
         private readonly BluetoothLEServer _server;
@@ -17,16 +20,31 @@ namespace LegoBluetooth
         private string _name;
         private GattServiceProvider _serviceProvider;
 
+        /// <summary>
+        /// Occurs when an error happens.
+        /// </summary>
         public event IBluetooth.OnErrorHandler OnError;
 
+        /// <inheritdoc/>
         public IBluetooth.ProcessIncomingHandler ProcessIncoming { get; set; }
+
+        /// <inheritdoc/>
         public IBluetooth.ClientJoiningStateChangedHandler ClientJoiningStateChanged { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BluetoothNano"/> class.
+        /// </summary>
         public BluetoothNano()
         {
             _server = BluetoothLEServer.Instance;
         }
 
+        /// <summary>
+        /// Sets up the Bluetooth device with the specified advertising data and name.
+        /// </summary>
+        /// <param name="adv">The advertising data.</param>
+        /// <param name="name">The name of the device.</param>
+        /// <returns>True if the setup was successful, otherwise false.</returns>
         public bool Setup(byte[] adv, string name)
         {
             _name = name;
@@ -49,7 +67,6 @@ namespace LegoBluetooth
                     CharacteristicProperties = GattCharacteristicProperties.WriteWithoutResponse | GattCharacteristicProperties.Write | GattCharacteristicProperties.Notify,
                     WriteProtectionLevel = GattProtectionLevel.Plain,
                     UserDescription = _name,
-                    StaticValue = sw.DetachBuffer(),
                 };
 
                 _serviceProvider = result.ServiceProvider;
@@ -68,7 +85,7 @@ namespace LegoBluetooth
                 var advert = new GattServiceProviderAdvertisingParameters()
                 {
                     IsConnectable = true,
-                    IsDiscoverable = true,
+                    IsDiscoverable = true,                    
                 };
                 advert.Advertisement.ManufacturerData.Add(new BluetoothLEManufacturerData(0x0397, sw.DetachBuffer()));
 
@@ -87,6 +104,7 @@ namespace LegoBluetooth
             return false;
         }
 
+        /// <inheritdoc/>
         public bool Connect()
         {
             // Ensure it's started
@@ -145,6 +163,7 @@ namespace LegoBluetooth
             return IsConnected;
         }
 
+        /// <inheritdoc/>
         public bool Disconnect()
         {
             _serviceProvider.StopAdvertising();
@@ -153,8 +172,10 @@ namespace LegoBluetooth
             return IsConnected;
         }
 
+        /// <inheritdoc/>
         public bool IsConnected {  get; private set; }
-        
+
+        /// <inheritdoc/>
         public bool NotifyValue(byte[] data)
         {
             bool status = false;

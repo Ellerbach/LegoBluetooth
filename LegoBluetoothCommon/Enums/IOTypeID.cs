@@ -9,6 +9,11 @@ namespace LegoBluetooth
     public enum IOTypeID : ushort
     {
         /// <summary>
+        /// Unknown. In that case, the device type won't be advertized.
+        /// </summary>
+        Unknown = 0x0000,
+
+        /// <summary>
         /// Motor.
         /// </summary>
         Motor = 0x0001,
@@ -76,6 +81,11 @@ namespace LegoBluetooth
         /// <summary>
         /// Internal Tilt.
         /// </summary>
-        InternalTilt = 0x0028
+        InternalTilt = 0x0028,
+
+        /// <summary>
+        /// Used for unkonw devices with a default configuration.
+        /// </summary>
+        Other = 0xFFFF
     }
 }

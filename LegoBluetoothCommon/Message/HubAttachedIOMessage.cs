@@ -2,6 +2,7 @@
 // Laurent Ellerbach licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics;
 
 namespace LegoBluetooth
 {
@@ -174,6 +175,9 @@ namespace LegoBluetooth
             {
                 Array.Copy(BitConverter.GetBytes((ushort)IOTypeID), 0, data, index, 2);
                 index += 2;
+                Debug.WriteLine($"HardwareRevision: {HardwareRevision.Major}.{HardwareRevision.Minor}.{HardwareRevision.Build}.{HardwareRevision.Revision}");
+                Debug.WriteLine($"Encoded: {VersionNumberEncoder.Encode(HardwareRevision)}");
+                Debug.WriteLine($"Bytes: {BitConverter.ToString(BitConverter.GetBytes(VersionNumberEncoder.Encode(HardwareRevision)))}");
                 Array.Copy(BitConverter.GetBytes(VersionNumberEncoder.Encode(HardwareRevision)), 0, data, index, 4);
                 index += 4;
                 Array.Copy(BitConverter.GetBytes(VersionNumberEncoder.Encode(SoftwareRevision)), 0, data, index, 4);
@@ -198,7 +202,8 @@ namespace LegoBluetooth
         /// <returns>A string representation of the hub attached I/O message.</returns>
         public override string ToString()
         {
-            return $"{base.ToString()}, PortID: {PortID}, Event: {Event}, IOTypeID: {IOTypeID}, HardwareRevision: {HardwareRevision}, SoftwareRevision: {SoftwareRevision}, PortIDA: {PortIDA}, PortIDB: {PortIDB}";
+            return $"{base.ToString()}, PortID: {PortID}, Event: {Event}, IOTypeID: {IOTypeID}, HardwareRevision: {HardwareRevision.Major}.{HardwareRevision.Minor}.{HardwareRevision.Build}.{HardwareRevision.Revision}" +
+                $", SoftwareRevision: {SoftwareRevision.Major}.{SoftwareRevision.Minor}.{SoftwareRevision.Build}.{SoftwareRevision.Revision}, PortIDA: {PortIDA}, PortIDB: {PortIDB}";
         }
     }
 }

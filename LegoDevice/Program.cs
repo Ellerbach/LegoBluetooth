@@ -1,24 +1,17 @@
 // Licensed to Laurent Ellerbach under one or more agreements.
 // Laurent Ellerbach licenses this file to you under the MIT license.
 
-using System;
-using System.Collections;
-using System.Diagnostics;
-using System.Text;
-using System.Threading;
 using LegoBluetooth;
-using nanoFramework.Device.Bluetooth;
-using nanoFramework.Device.Bluetooth.Advertisement;
-using nanoFramework.Device.Bluetooth.GenericAttributeProfile;
+using System;
+using System.Diagnostics;
+using System.Threading;
 
 namespace LegoBluetoothHub
 {
     public class Program
     {
-        private static GattLocalCharacteristic _legoCharacteristic;
-
         public static void Main()
-        {         
+        {
             BluetoothNano bluetooth = new BluetoothNano();
 
             var hub = new MoveHub(bluetooth);
@@ -29,7 +22,12 @@ namespace LegoBluetoothHub
             bluetooth.OnError += BluetoothOnError;
             bluetooth.ProcessIncoming = hub.ProcessReceived;
             bluetooth.ClientJoiningStateChanged = hub.ClientJoiningStateChanged;
-            bluetooth.Setup(hub.BluetoothAdvertisingData.ToByteArray(), hub.Name);
+            var ret = bluetooth.Setup(hub.BluetoothAdvertisingData.ToByteArray(), hub.Name);
+            if (!ret)
+            {
+                Debug.WriteLine("Error setting up the Bluetooth");
+                return;
+            }
 
             bluetooth.Connect();
 

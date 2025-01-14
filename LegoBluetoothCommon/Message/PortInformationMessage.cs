@@ -23,7 +23,7 @@ namespace LegoBluetooth
         /// <summary>
         /// Gets or sets the capabilities for MODE INFO.
         /// </summary>
-        public byte Capabilities { get; set; }
+        public Capabilities Capabilities { get; set; }
 
         /// <summary>
         /// Gets or sets the total mode count for MODE INFO.
@@ -43,7 +43,7 @@ namespace LegoBluetooth
         /// <summary>
         /// Gets or sets the mode combinations for POSSIBLE MODE COMBINATIONS.
         /// </summary>
-        public ushort[] ModeCombinations { get; set; }
+        public byte[] ModeCombinations { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PortInformationMessage"/> class.
@@ -56,7 +56,7 @@ namespace LegoBluetooth
         /// <param name="inputModes">The available input port modes for MODE INFO.</param>
         /// <param name="outputModes">The available output port modes for MODE INFO.</param>
         /// <param name="modeCombinations">The mode combinations for POSSIBLE MODE COMBINATIONS.</param>
-        public PortInformationMessage(byte hubID, byte portID, InformationType informationType, byte capabilities, byte totalModeCount, ushort inputModes, ushort outputModes, ushort[] modeCombinations)
+        public PortInformationMessage(byte hubID, byte portID, InformationType informationType, Capabilities capabilities, byte totalModeCount, ushort inputModes, ushort outputModes, byte[] modeCombinations)
             : base(hubID, MessageType.PortInformation)
         {
             // Section 3.19
@@ -76,9 +76,9 @@ namespace LegoBluetooth
         /// <returns>A <see cref="PortInformationMessage"/> instance.</returns>
         public static new PortInformationMessage Decode(byte[] data)
         {
-            if (data == null || data.Length < 7)
+            if (data == null || data.Length < 5)
             {
-                throw new ArgumentException("Invalid data array. Must contain at least 7 bytes.", nameof(data));
+                throw new ArgumentException("Invalid data array. Must contain at least 5 bytes.", nameof(data));
             }
 
             byte portID = data[3];
@@ -91,7 +91,7 @@ namespace LegoBluetooth
                 ushort inputModes = BitConverter.ToUInt16(data, 7);
                 ushort outputModes = BitConverter.ToUInt16(data, 9);
 
-                return new PortInformationMessage(data[1], portID, informationType, capabilities, totalModeCount, inputModes, outputModes, null)
+                return new PortInformationMessage(data[1], portID, informationType, (Capabilities)capabilities, totalModeCount, inputModes, outputModes, null)
                 {
                     Message = data,
                     Length = data[0],
@@ -99,14 +99,14 @@ namespace LegoBluetooth
             }
             else if (informationType == InformationType.PossibleModeCombinations)
             {
-                int combinationCount = (data.Length - 5) / 2;
-                ushort[] modeCombinations = new ushort[combinationCount];
+                int combinationCount = (data.Length - 5);
+                byte[] modeCombinations = new byte[combinationCount];
                 for (int i = 0; i < combinationCount; i++)
                 {
-                    modeCombinations[i] = BitConverter.ToUInt16(data, 5 + i * 2);
+                    modeCombinations[i] = data[5 + i];
                 }
 
-                return new PortInformationMessage(data[1], portID, informationType, 0, 0, 0, 0, modeCombinations)
+                return new PortInformationMessage(data[1], portID, informationType, (Capabilities)0, 0, 0, 0, modeCombinations)
                 {
                     Message = data,
                     Length = data[0],
@@ -144,7 +144,7 @@ namespace LegoBluetooth
 
             if (InformationType == InformationType.ModeInfo)
             {
-                data[index++] = Capabilities;
+                data[index++] = (byte)Capabilities;
                 data[index++] = TotalModeCount;
                 Array.Copy(BitConverter.GetBytes(InputModes), 0, data, index, 2);
                 index += 2;
@@ -157,8 +157,7 @@ namespace LegoBluetooth
                 {
                     for (int i = 0; i < ModeCombinations.Length; i++)
                     {
-                        Array.Copy(BitConverter.GetBytes(ModeCombinations[i]), 0, data, index, 2);
-                        index += 2;
+                        data[index++]= ModeCombinations[i];
                     }
                 }
             }

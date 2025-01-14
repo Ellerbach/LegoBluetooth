@@ -127,7 +127,7 @@ namespace LegoBluetooth
             switch (modeInformationType)
             {
                 case ModeInformationType.Name:
-                    message.Name = Encoding.UTF8.GetString(data, 6, data.Length - 6);
+                    message.Name = Encoding.UTF8.GetString(data, 6, data.Length - 6).TrimEnd('\0');
                     break;
                 case ModeInformationType.Raw:
                     message.RawMin = BitConverter.ToSingle(data, 6);
@@ -142,7 +142,7 @@ namespace LegoBluetooth
                     message.SiMax = BitConverter.ToSingle(data, 10);
                     break;
                 case ModeInformationType.Symbol:
-                    message.Symbol = Encoding.UTF8.GetString(data, 6, data.Length - 6);
+                    message.Symbol = Encoding.UTF8.GetString(data, 6, data.Length - 6).TrimEnd('\0');
                     break;
                 case ModeInformationType.Mapping:
                     message.Mapping = BitConverter.ToUInt16(data, 6);
