@@ -6,7 +6,7 @@ using System;
 namespace LegoBluetooth
 {
     /// <summary>
-    /// Represents a message used to control synchronization of Ports.
+    /// Represents a 0x61 message used to control synchronization of Ports.
     /// </summary>
     public class VirtualPortSetupMessage : CommonMessageHeader
     {

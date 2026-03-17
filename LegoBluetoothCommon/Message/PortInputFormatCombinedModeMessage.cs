@@ -6,7 +6,7 @@ using System;
 namespace LegoBluetooth
 {
     /// <summary>
-    /// Represents a message that provides a handshake notification for the setup of one or more bit-pointers in the 16-bit Mode/Dataset Combination Bit Pointer.
+    /// Represents a 0x48 message that provides a handshake notification for the setup of one or more bit-pointers in the 16-bit Mode/Dataset Combination Bit Pointer.
     /// </summary>
     public class PortInputFormatCombinedModeMessage : CommonMessageHeader
     {

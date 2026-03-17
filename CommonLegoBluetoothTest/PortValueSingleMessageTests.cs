@@ -10,52 +10,61 @@ using nanoFramework.TestFramework;
 
 namespace CommonLegoBluetoothTest
 {
-    // TODO: fix all this, this is not working properly
     [TestClass]
     public class PortValueSingleMessageTests
     {
         [TestMethod]
-        [DataRow(new byte[] { 7, 0, 0x45, 1, 0x00, 0x01 }, new object[] { (byte)0x01 })]
-        [DataRow(new byte[] { 9, 0, 0x45, 2, 0x01, 0x03, 0x04 }, new object[] { (ushort)0x0403 })]
-        [DataRow(new byte[] { 11, 0, 0x45, 3, 0x02, 0x07, 0x08, 0x09, 0x0A }, new object[] { (uint)0x0A090807 })]
-        [DataRow(new byte[] { 11, 0, 0x45, 4, 0x03, 0x00, 0x00, 0x80, 0x3F }, new object[] { 1.0f })]
-        public void Decode_ValidData_ReturnsPortValueSingleMessage(byte[] data, object[] expectedValues)
+        [DataRow(new byte[] { 5, 0, 0x45, 1, 0x01 }, new byte[] { 1, 0x01 })]
+        [DataRow(new byte[] { 6, 0, 0x45, 2, 0x03, 0x04 }, new byte[] { 2, 0x03, 0x04 })]
+        [DataRow(new byte[] { 8, 0, 0x45, 3, 0x07, 0x08, 0x09, 0x0A }, new byte[] { 3, 0x07, 0x08, 0x09, 0x0A })]
+        [DataRow(new byte[] { 8, 0, 0x45, 4, 0x00, 0x00, 0x80, 0x3F }, new byte[] { 4, 0x00, 0x00, 0x80, 0x3F })]
+        public void Decode_ValidData_ReturnsPortValueSingleMessage(byte[] data, byte[] expectedPayload)
         {
             // Act
             var message = PortValueSingleMessage.Decode(data);
 
             // Assert
-            Assert.AreEqual(expectedValues.Length, message.PortValues.Count);
-            for (int i = 0; i < expectedValues.Length; i++)
-            {
-                var portValue = (PortValueEntry)message.PortValues[i];
-                Assert.AreEqual(expectedValues[i], portValue.InputValue);
-            }
+            // Decode stores raw payload (PortID + value bytes) since value
+            // parsing requires knowing the mode's ValueFormat from prior setup.
+            Assert.AreEqual((ushort)data[0], message.Length);
+            Assert.AreEqual(0, message.PortValues.Count);
+            CollectionAssert.AreEqual(expectedPayload, message.Payload);
         }
 
         [TestMethod]
-        [DataRow((byte)0, new object[] { (byte)0x01 }, new byte[] { 7, 0, 0x45, 0, 0x00, 0x01 })]
-        [DataRow((byte)0, new object[] { (ushort)0x0403 }, new byte[] { 9, 0, 0x45, 0, 0x01, 0x03, 0x04 })]
-        [DataRow((byte)0, new object[] { (uint)0x0A090807 }, new byte[] { 11, 0, 0x45, 0, 0x02, 0x07, 0x08, 0x09, 0x0A })]
-        [DataRow((byte)0, new object[] { 1.0f }, new byte[] { 11, 0, 0x45, 0, 0x03, 0x00, 0x00, 0x80, 0x3F })]
-        public void ToByteArray_ValidData_ReturnsByteArray(byte hubID, object[] values, byte[] expectedData)
+        public void ToByteArray_ByteValue_ReturnsByteArray()
         {
-            // Arrange
-            var message = new PortValueSingleMessage(hubID);
-            foreach (var value in values)
-            {
-                message.PortValues.Add(new PortValueEntry
-                {
-                    PortID = 0,
-                    InputValue = value
-                });
-            }
-
-            // Act
+            var message = new PortValueSingleMessage(0);
+            message.PortValues.Add(new PortValueEntry { PortID = 0, InputValue = (byte)0x01 });
             var data = message.ToByteArray();
+            CollectionAssert.AreEqual(new byte[] { 5, 0, 0x45, 0, 0x01 }, data);
+        }
 
-            // Assert
-            CollectionAssert.AreEqual(expectedData, data);
+        [TestMethod]
+        public void ToByteArray_UshortValue_ReturnsByteArray()
+        {
+            var message = new PortValueSingleMessage(0);
+            message.PortValues.Add(new PortValueEntry { PortID = 0, InputValue = (ushort)0x0403 });
+            var data = message.ToByteArray();
+            CollectionAssert.AreEqual(new byte[] { 6, 0, 0x45, 0, 0x03, 0x04 }, data);
+        }
+
+        [TestMethod]
+        public void ToByteArray_UintValue_ReturnsByteArray()
+        {
+            var message = new PortValueSingleMessage(0);
+            message.PortValues.Add(new PortValueEntry { PortID = 0, InputValue = (uint)0x0A090807 });
+            var data = message.ToByteArray();
+            CollectionAssert.AreEqual(new byte[] { 8, 0, 0x45, 0, 0x07, 0x08, 0x09, 0x0A }, data);
+        }
+
+        [TestMethod]
+        public void ToByteArray_FloatValue_ReturnsByteArray()
+        {
+            var message = new PortValueSingleMessage(0);
+            message.PortValues.Add(new PortValueEntry { PortID = 0, InputValue = 1.0f });
+            var data = message.ToByteArray();
+            CollectionAssert.AreEqual(new byte[] { 8, 0, 0x45, 0, 0x00, 0x00, 0x80, 0x3F }, data);
         }
     }
 }

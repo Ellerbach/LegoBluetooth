@@ -6,7 +6,7 @@ using System;
 namespace LegoBluetooth
 {
     /// <summary>
-    /// Represents a H/W Network message.
+    /// Represents a H/W Network 0x08 message.
     /// </summary>
     public class HWNetworkMessage : CommonMessageHeader
     {

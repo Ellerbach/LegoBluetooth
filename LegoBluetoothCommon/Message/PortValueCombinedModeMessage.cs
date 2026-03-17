@@ -7,7 +7,7 @@ using System.Collections;
 namespace LegoBluetooth
 {
     /// <summary>
-    /// Represents a message that updates the host with values from a Combined Mode sensor.
+    /// Represents a 0x46 message that updates the host with values from a Combined Mode sensor.
     /// </summary>
     public class PortValueCombinedModeMessage : CommonMessageHeader
     {
@@ -17,9 +17,19 @@ namespace LegoBluetooth
         public byte PortID { get; set; }
 
         /// <summary>
+        /// Gets or sets the combined Mode/Dataset bit-pointer indicating which mode/dataset combinations have values.
+        /// </summary>
+        public ushort BitPointer { get; set; }
+
+        /// <summary>
         /// Gets or sets the list of port value entries.
         /// </summary>
         public ArrayList PortValues { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Payload associated to this request as it requires to know the mode for a proper decoding.
+        /// </summary>
+        public byte[] Payload { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PortValueCombinedModeMessage"/> class.
@@ -46,8 +56,18 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid data array. Must contain at least 6 bytes.", nameof(data));
             }
 
-            // We need to compute the proper length
-            int index = data.Length > 127 ? 2 : 1;
+            ushort length;
+            int index;
+            if ((data[0] & 0x80) == 0x80)
+            {
+                length = (ushort)((data[0] & 0x7F) | (data[1] << 7));
+                index = 2;
+            }
+            else
+            {
+                length = data[0];
+                index = 1;
+            }
 
             byte hubId = data[index++];
             // Skipping the message type
@@ -59,42 +79,12 @@ namespace LegoBluetooth
             var message = new PortValueCombinedModeMessage(hubId, portID)
             {
                 Message = data,
-                Length = (ushort)(data.Length > 127 ? data.Length - 1: data.Length),
+                Length = length,
+                BitPointer = bitPointer,
             };
 
-            // TODO This doesn't work, needs adjustements
-            while (index < data.Length)
-            {
-                object inputValue;
-                switch (bitPointer)
-                {
-                    case 0x00: // 8 bit
-                        inputValue = data[index++];
-                        break;
-                    case 0x01: // 16 bit
-                        inputValue = BitConverter.ToUInt16(data, index);
-                        index += 2;
-                        break;
-                    case 0x02: // 32 bit
-                        inputValue = BitConverter.ToUInt32(data, index);
-                        index += 4;
-                        break;
-                    case 0x03: // FLOAT
-                        inputValue = BitConverter.ToSingle(data, index);
-                        index += 4;
-                        break;
-                    default:
-                        throw new ArgumentException("Invalid value type.", nameof(data));
-                }
-
-                message.PortValues.Add(new PortValueEntryCombined
-                {
-                    BitPointer = bitPointer,
-                    InputValue = inputValue
-                });
-
-                bitPointer++;
-            }
+            message.Payload = new byte[data.Length - index];
+            Array.Copy(data, index, message.Payload, 0, message.Payload.Length);
 
             return message;
         }
@@ -115,15 +105,23 @@ namespace LegoBluetooth
             data.Add(PortID);
             length++;
 
+            // Compute single combined bitmask from all entries
+            ushort combinedBitPointer = 0;
             foreach (PortValueEntryCombined portValue in PortValues)
             {
-                byte[] bitPointerBytes = BitConverter.GetBytes(portValue.BitPointer);
-                foreach (byte b in bitPointerBytes)
-                {
-                    data.Add(b);
-                    length++;
-                }
+                combinedBitPointer |= (ushort)(1 << portValue.BitPointer);
+            }
 
+            byte[] bitPointerBytes = BitConverter.GetBytes(combinedBitPointer);
+            foreach (byte b in bitPointerBytes)
+            {
+                data.Add(b);
+                length++;
+            }
+
+            // Write values sequentially (no per-entry bit-pointer)
+            foreach (PortValueEntryCombined portValue in PortValues)
+            {
                 switch (portValue.InputValue)
                 {
                     case byte value8:
@@ -157,16 +155,18 @@ namespace LegoBluetooth
             }
 
             // Now need to encode properly the length
-            Length = (ushort)length;
-            if (Length < 127)
+            if (length > 127)
             {
-                data.Insert(0, (byte)Length);
+                length += 1; // Account for 2-byte length header
+                data.Insert(0, (byte)((length & 0x7F) | 0x80));
+                data.Insert(1, (byte)(length >> 7));
             }
             else
             {
-                data.Insert(0, (byte)((Length >> 8) | 0x80));
-                data.Insert(1, (byte)(Length & 0xFF));
+                data.Insert(0, (byte)length);
             }
+
+            Length = (ushort)length;
 
             return (byte[])data.ToArray(typeof(byte));
         }
@@ -178,13 +178,21 @@ namespace LegoBluetooth
         public override string ToString()
         {
             string portValuesString = "";
-            foreach (PortValueEntryCombined portValue in PortValues)
+            if (PortValues != null)
             {
-                if (portValuesString.Length > 0)
+                foreach (PortValueEntryCombined portValue in PortValues)
                 {
-                    portValuesString += ", ";
+                    if (portValuesString.Length > 0)
+                    {
+                        portValuesString += ", ";
+                    }
+                    portValuesString += $"BitPointer: {portValue.BitPointer}, InputValue: {portValue.InputValue}";
                 }
-                portValuesString += $"BitPointer: {portValue.BitPointer}, InputValue: {portValue.InputValue}";
+            }
+
+            if (Payload != null)
+            {
+                portValuesString += $", Payload: {BitConverter.ToString(Payload)}";
             }
 
             return $"{base.ToString()}, PortID: {PortID}, PortValues: [{portValuesString}]";

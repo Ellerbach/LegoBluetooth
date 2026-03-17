@@ -6,7 +6,7 @@ using System;
 namespace LegoBluetooth
 {
     /// <summary>
-    /// Represents a message for performing control actions on the connected Hub.
+    /// Represents a 0x02 message for performing control actions on the connected Hub.
     /// </summary>
     public class HubActionMessage : CommonMessageHeader
     {

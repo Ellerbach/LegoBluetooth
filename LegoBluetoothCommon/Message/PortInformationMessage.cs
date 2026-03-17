@@ -6,7 +6,7 @@ using System;
 namespace LegoBluetooth
 {
     /// <summary>
-    /// Represents a message that returns the specified information about the LPF2 Device connected to the Port.
+    /// Represents a 0x43 message that returns the specified information about the LPF2 Device connected to the Port.
     /// </summary>
     public class PortInformationMessage : CommonMessageHeader
     {
@@ -43,7 +43,7 @@ namespace LegoBluetooth
         /// <summary>
         /// Gets or sets the mode combinations for POSSIBLE MODE COMBINATIONS.
         /// </summary>
-        public byte[] ModeCombinations { get; set; }
+        public ushort[] ModeCombinations { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PortInformationMessage"/> class.
@@ -56,7 +56,7 @@ namespace LegoBluetooth
         /// <param name="inputModes">The available input port modes for MODE INFO.</param>
         /// <param name="outputModes">The available output port modes for MODE INFO.</param>
         /// <param name="modeCombinations">The mode combinations for POSSIBLE MODE COMBINATIONS.</param>
-        public PortInformationMessage(byte hubID, byte portID, InformationType informationType, Capabilities capabilities, byte totalModeCount, ushort inputModes, ushort outputModes, byte[] modeCombinations)
+        public PortInformationMessage(byte hubID, byte portID, InformationType informationType, Capabilities capabilities, byte totalModeCount, ushort inputModes, ushort outputModes, ushort[] modeCombinations)
             : base(hubID, MessageType.PortInformation)
         {
             // Section 3.19
@@ -99,11 +99,11 @@ namespace LegoBluetooth
             }
             else if (informationType == InformationType.PossibleModeCombinations)
             {
-                int combinationCount = (data.Length - 5);
-                byte[] modeCombinations = new byte[combinationCount];
+                int combinationCount = (data.Length - 5) / 2;
+                ushort[] modeCombinations = new ushort[combinationCount];
                 for (int i = 0; i < combinationCount; i++)
                 {
-                    modeCombinations[i] = data[5 + i];
+                    modeCombinations[i] = BitConverter.ToUInt16(data, 5 + i * 2);
                 }
 
                 return new PortInformationMessage(data[1], portID, informationType, (Capabilities)0, 0, 0, 0, modeCombinations)
@@ -130,7 +130,7 @@ namespace LegoBluetooth
             }
             else if (InformationType == InformationType.PossibleModeCombinations)
             {
-                Length = (ushort)(5 + (ModeCombinations != null ? ModeCombinations.Length : 0) * 2);
+                Length = (ushort)(5 + (ModeCombinations != null ? ModeCombinations.Length * 2 : 0));
             }
 
             byte[] data = new byte[Length];
@@ -157,7 +157,8 @@ namespace LegoBluetooth
                 {
                     for (int i = 0; i < ModeCombinations.Length; i++)
                     {
-                        data[index++]= ModeCombinations[i];
+                        Array.Copy(BitConverter.GetBytes(ModeCombinations[i]), 0, data, index, 2);
+                        index += 2;
                     }
                 }
             }

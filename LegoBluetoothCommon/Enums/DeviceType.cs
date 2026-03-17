@@ -31,6 +31,16 @@ namespace LegoBluetooth
         /// <summary>
         /// LEGO 2 Port Handset.
         /// </summary>
-        TwoPortHandset = 0b010_00010
+        TwoPortHandset = 0b010_00010,
+
+        /// <summary>
+        /// LEGO Mario Hub.
+        /// </summary>
+        MarioHub = 0b010_00011,
+
+        /// <summary>
+        /// LEGO Technic Medium Hub.
+        /// </summary>
+        TechnicMediumHub = 0b100_00000
     }
 }

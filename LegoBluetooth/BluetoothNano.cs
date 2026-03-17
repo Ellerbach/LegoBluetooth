@@ -127,8 +127,9 @@ namespace LegoBluetooth
                         request.Respond();
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Debug.WriteLine($"Error processing write: {ex.Message}");
                     OnError?.Invoke(StatusError.WriteError);
                 }
             };

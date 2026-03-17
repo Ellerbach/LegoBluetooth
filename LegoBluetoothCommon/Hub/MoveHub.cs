@@ -13,6 +13,8 @@ namespace LegoBluetooth
     /// </summary>
     public class MoveHub : BaseHub
     {
+        public const string MoveHubName = "Move Hub";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MoveHub0x46"/> class.
         /// </summary>
@@ -21,7 +23,8 @@ namespace LegoBluetooth
         /// <param name="portID">The ID of the port.</param>
         public MoveHub(IBluetooth bluetooth) : base(bluetooth)
         {
-            Name = "Move Hub";
+            DefaultName = MoveHubName;
+            Name = MoveHubName;
             BluetoothAdvertisingData = new BluetoothAdvertisingData(
                 false,
                 SystemTypeDeviceNumberHelper.Encode(SystemType.LegoSystem1, DeviceType.BoostHub),
@@ -68,8 +71,8 @@ namespace LegoBluetooth
             Devices.Add(voltageSensor);
             Devices.Add(moveHub0X46);
 
-            // This currently consumes too much memory
-            // HydrateModes();
+            // Th will consume quite some memory and won't work on low memory devices
+            HydrateModes();
         }
 
         /// <inheritdoc/>

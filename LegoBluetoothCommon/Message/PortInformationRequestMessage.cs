@@ -6,7 +6,7 @@ using System;
 namespace LegoBluetooth
 {
     /// <summary>
-    /// Represents a message to request port information and value.
+    /// Represents a 0x21 message to request port information and value.
     /// </summary>
     public class PortInformationRequestMessage : CommonMessageHeader
     {

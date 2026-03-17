@@ -8,7 +8,8 @@ namespace LegoBluetooth
     public static class PortOutputCommandHelper
     {
         /// <summary>
-        /// Creates a WriteDirect command payload.
+        /// Creates a WriteDirect (0x50) command payload.
+        /// Per spec, the payload is passed through directly with no checksum.
         /// </summary>
         /// <param name="payload">The payload for the sub-command.</param>
         /// <returns>A byte array representing the WriteDirect command payload.</returns>
@@ -19,17 +20,15 @@ namespace LegoBluetooth
                 throw new ArgumentException("Payload cannot be null or empty.", nameof(payload));
             }
 
-            byte[] data = new byte[payload.Length + 1];
+            byte[] data = new byte[payload.Length];
             Array.Copy(payload, 0, data, 0, payload.Length);
-
-            byte checksum = CalculateChecksum(payload);
-            data[data.Length - 1] = checksum;
 
             return data;
         }
 
         /// <summary>
-        /// Creates a WriteDirectModeData command payload.
+        /// Creates a WriteDirectModeData (0x51) command payload.
+        /// Per spec, format is: Mode, Payload... (no checksum).
         /// </summary>
         /// <param name="mode">The mode for the sub-command.</param>
         /// <param name="payload">The payload for the sub-command.</param>
@@ -41,29 +40,11 @@ namespace LegoBluetooth
                 throw new ArgumentException("Payload cannot be null or empty.", nameof(payload));
             }
 
-            byte[] data = new byte[payload.Length + 2];
+            byte[] data = new byte[payload.Length + 1];
             data[0] = mode;
             Array.Copy(payload, 0, data, 1, payload.Length);
 
-            byte checksum = CalculateChecksum(payload);
-            data[data.Length - 1] = checksum;
-
             return data;
-        }
-
-        /// <summary>
-        /// Calculates the checksum for the given payload.
-        /// </summary>
-        /// <param name="payload">The payload for which to calculate the checksum.</param>
-        /// <returns>The calculated checksum.</returns>
-        private static byte CalculateChecksum(byte[] payload)
-        {
-            byte checksum = 0xFF;
-            foreach (byte b in payload)
-            {
-                checksum ^= b;
-            }
-            return checksum;
         }
     }
 }

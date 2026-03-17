@@ -7,7 +7,7 @@ using System.Collections;
 namespace LegoBluetooth
 {
     /// <summary>
-    /// Represents a message that provides feedback for port output commands.
+    /// Represents a 0x82 message that provides feedback for port output commands.
     /// </summary>
     public class PortOutputCommandFeedbackMessage : CommonMessageHeader
     {
@@ -72,14 +72,15 @@ namespace LegoBluetooth
 
             Length = (ushort)(3 + (PortFeedbacks.Count * 2));
 
-            if (Length < 127)
+            if (Length <= 127)
             {
                 data.Add((byte)Length);
             }
             else
             {
-                data.Add((byte)((Length >> 8) | 0x80));
-                data.Add((byte)(Length & 0xFF));
+                Length += 1; // Account for 2-byte length header
+                data.Add((byte)((Length & 0x7F) | 0x80));
+                data.Add((byte)(Length >> 7));
             }
 
             data.Add(HubID);

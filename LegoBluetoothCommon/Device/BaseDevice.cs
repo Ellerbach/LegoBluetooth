@@ -34,6 +34,11 @@ namespace LegoBluetooth.Device
         public ushort OutpoutModes { get; set; }
 
         /// <summary>
+        /// Gets or sets the port capabilities.
+        /// </summary>
+        public Capabilities PortCapabilities { get; set; }
+
+        /// <summary>
         /// Gets or sets the list of port modes.
         /// </summary>
         public ArrayList Modes { get; internal set; } = new ArrayList();
@@ -124,9 +129,9 @@ namespace LegoBluetooth.Device
             else if (msg.MessageType == MessageType.PortInformation)
             {
                 PortInformationMessage info = (PortInformationMessage)msg;
-                if (Modes.Count == 0)
+                if (info.InformationType == InformationType.ModeInfo)
                 {
-                    if (info.InformationType == InformationType.ModeInfo)
+                    if (Modes.Count == 0)
                     {
                         for (int i = 0; i < info.TotalModeCount; i++)
                         {
@@ -135,17 +140,19 @@ namespace LegoBluetooth.Device
                                 PortID = info.PortID,
                                 HubID = info.HubID,
                                 ModeIndex = (byte)i,
+                                IsInput = ((info.InputModes >> i) & 1) == 1,
+                                IsOutput = ((info.OutputModes >> i) & 1) == 1,
                             };
                             Modes.Add(mode);
                         }
 
                         InputModes = info.InputModes;
                         OutpoutModes = info.OutputModes;
+                        PortCapabilities = info.Capabilities;
                     }
                 }
                 else if (info.InformationType == InformationType.PossibleModeCombinations)
                 {
-                    // Populate the rest
                     for (int i = 0; i < info.ModeCombinations.Length; i++)
                     {
                         ModeCombinations.Add(info.ModeCombinations[i]);

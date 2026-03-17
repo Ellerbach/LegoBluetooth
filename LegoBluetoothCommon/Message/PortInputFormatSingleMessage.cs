@@ -6,7 +6,7 @@ using System;
 namespace LegoBluetooth
 {
     /// <summary>
-    /// Represents a message that provides a handshake notification of changes made to the Port Input Format.
+    /// Represents a 0x47 message that provides a handshake notification of changes made to the Port Input Format.
     /// </summary>
     public class PortInputFormatSingleMessage : CommonMessageHeader
     {

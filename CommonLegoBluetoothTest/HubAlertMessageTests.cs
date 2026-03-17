@@ -14,7 +14,7 @@ namespace CommonLegoBluetoothTest
     {
         [TestMethod]
         [DataRow((byte)0x01, (byte)HubAlertType.LowVoltage, (byte)HubAlertOperation.EnableUpdates, (byte)HubAlertPayload.StatusOK)]
-        [DataRow((byte)0x02, (byte)HubAlertType.HighCurrent, (byte)HubAlertOperation.DisableUpdates, (byte)HubAlertPayload.Alert)]
+        [DataRow((byte)0x02, (byte)HubAlertType.HighCurrent, (byte)HubAlertOperation.Update, (byte)HubAlertPayload.Alert)]
         public void Constructor_ShouldInitializeProperties(byte hubID, byte alertType, byte alertOperation, byte alertPayload)
         {
             // Act
@@ -25,7 +25,7 @@ namespace CommonLegoBluetoothTest
             Assert.AreEqual(alertType, (byte)hubAlertMessage.AlertType);
             Assert.AreEqual(alertOperation, (byte)hubAlertMessage.AlertOperation);
             Assert.AreEqual(alertPayload, (byte)hubAlertMessage.AlertPayload);
-            Assert.AreEqual((ushort)(5 + ((HubAlertPayload)alertPayload != HubAlertPayload.NoStatus ? 1 : 0)), hubAlertMessage.Length);
+            Assert.AreEqual((ushort)((HubAlertOperation)alertOperation == HubAlertOperation.Update ? 6 : 5), hubAlertMessage.Length);
         }
 
         [TestMethod]
@@ -45,8 +45,8 @@ namespace CommonLegoBluetoothTest
         }
 
         [TestMethod]
-        [DataRow(new byte[] { 0x06, 0x01, 0x03, 0x01, 0x01, 0x00 }, (byte)0x01, (byte)HubAlertType.LowVoltage, (byte)HubAlertOperation.EnableUpdates, (byte)HubAlertPayload.StatusOK)]
-        [DataRow(new byte[] { 0x05, 0x02, 0x03, 0x02, 0x02 }, (byte)0x02, (byte)HubAlertType.HighCurrent, (byte)HubAlertOperation.DisableUpdates, (byte)HubAlertPayload.NoStatus)]
+        [DataRow(new byte[] { 0x06, 0x01, 0x03, 0x01, 0x04, 0x00 }, (byte)0x01, (byte)HubAlertType.LowVoltage, (byte)HubAlertOperation.Update, (byte)HubAlertPayload.StatusOK)]
+        [DataRow(new byte[] { 0x05, 0x02, 0x03, 0x02, 0x02 }, (byte)0x02, (byte)HubAlertType.HighCurrent, (byte)HubAlertOperation.DisableUpdates, (byte)HubAlertPayload.StatusOK)]
         public void Decode_ShouldReturnHubAlertMessage_WhenDataIsValid(byte[] data, byte expectedHubID, byte expectedAlertType, byte expectedAlertOperation, byte expectedAlertPayload)
         {
             // Act
@@ -62,8 +62,8 @@ namespace CommonLegoBluetoothTest
         }
 
         [TestMethod]
-        [DataRow((byte)0x01, (byte)HubAlertType.LowVoltage, (byte)HubAlertOperation.EnableUpdates, (byte)HubAlertPayload.StatusOK, new byte[] { 0x06, 0x01, 0x03, 0x01, 0x01, 0x00 })]
-        [DataRow((byte)0x02, (byte)HubAlertType.HighCurrent, (byte)HubAlertOperation.DisableUpdates, (byte)HubAlertPayload.NoStatus, new byte[] { 0x05, 0x02, 0x03, 0x02, 0x02 })]
+        [DataRow((byte)0x01, (byte)HubAlertType.LowVoltage, (byte)HubAlertOperation.Update, (byte)HubAlertPayload.StatusOK, new byte[] { 0x06, 0x01, 0x03, 0x01, 0x04, 0x00 })]
+        [DataRow((byte)0x02, (byte)HubAlertType.HighCurrent, (byte)HubAlertOperation.DisableUpdates, (byte)HubAlertPayload.StatusOK, new byte[] { 0x05, 0x02, 0x03, 0x02, 0x02 })]
         public void ToByteArray_ShouldReturnByteArray(byte hubID, byte alertType, byte alertOperation, byte alertPayload, byte[] expectedData)
         {
             // Arrange

@@ -13,7 +13,7 @@ namespace CommonLegoBluetoothTest
     public class PortOutputCommandMessageTests
     {
         [TestMethod]
-        [DataRow(new byte[] { 8, 0, 0x81, 1, 0x10, 0x00, 0x01, 0x02 }, (byte)1, (byte)StartupCompletionInfo.ExecuteImmediately, (byte)SubCommandType.StartPower, new byte[] { 0x01, 0x02 })]
+        [DataRow(new byte[] { 8, 0, 0x81, 1, 0x10, 0x01, 0x01, 0x02 }, (byte)1, (byte)StartupCompletionInfo.ExecuteImmediately, (byte)SubCommandType.StartPower, new byte[] { 0x01, 0x02 })]
         [DataRow(new byte[] { 10, 0, 0x81, 2, 0x11, 0x02, 0x03, 0x04, 0x05, 0x06 }, (byte)2, (byte)(StartupCompletionInfo.ExecuteImmediately | StartupCompletionInfo.CommandFeedback), (byte)SubCommandType.StartPowerDual, new byte[] { 0x03, 0x04, 0x05, 0x06 })]
         public void Decode_ValidData_ReturnsPortOutputCommandMessage(byte[] data, byte expectedPortID, byte expectedStartupCompletion, byte expectedSubCommand, byte[] expectedPayload)
         {
@@ -28,7 +28,7 @@ namespace CommonLegoBluetoothTest
         }
 
         [TestMethod]
-        [DataRow((byte)0, (byte)1, (byte)StartupCompletionInfo.ExecuteImmediately, (byte)SubCommandType.StartPower, new byte[] { 0x01, 0x02 }, new byte[] { 8, 0, 0x81, 1, 0x10, 0x00, 0x01, 0x02 })]
+        [DataRow((byte)0, (byte)1, (byte)StartupCompletionInfo.ExecuteImmediately, (byte)SubCommandType.StartPower, new byte[] { 0x01, 0x02 }, new byte[] { 8, 0, 0x81, 1, 0x10, 0x01, 0x01, 0x02 })]
         [DataRow((byte)0, (byte)2, (byte)(StartupCompletionInfo.ExecuteImmediately | StartupCompletionInfo.CommandFeedback), (byte)SubCommandType.StartPowerDual, new byte[] { 0x03, 0x04, 0x05, 0x06 }, new byte[] { 10, 0, 0x81, 2, 0x11, 0x02, 0x03, 0x04, 0x05, 0x06 })]
         public void ToByteArray_ValidData_ReturnsByteArray(byte hubID, byte portID, byte startupCompletion, byte subCommand, byte[] payload, byte[] expectedData)
         {

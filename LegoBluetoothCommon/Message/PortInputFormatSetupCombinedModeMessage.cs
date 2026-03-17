@@ -6,7 +6,7 @@ using System;
 namespace LegoBluetooth
 {
     /// <summary>
-    /// Represents a message to set up a sensor which can be used with more combinations of Mode and DataSets (CombinedMode).
+    /// Represents a 0x42 message to set up a sensor which can be used with more combinations of Mode and DataSets (CombinedMode).
     /// </summary>
     public class PortInputFormatSetupCombinedModeMessage : CommonMessageHeader
     {

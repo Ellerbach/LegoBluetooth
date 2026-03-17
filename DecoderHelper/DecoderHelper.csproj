@@ -9,4 +9,22 @@
 
   <Import Project="..\LegoBluetoothCommon\LegoBluetoothCommon.projitems" Label="Shared" />
 
+  <ItemGroup>
+    <None Update="BasicConnectionWithAlerts.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="BasicConnectionWithMoveHub.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="CommunicationMoveHub.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DetailedCommunicationWithPhone.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="FailedConnection.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

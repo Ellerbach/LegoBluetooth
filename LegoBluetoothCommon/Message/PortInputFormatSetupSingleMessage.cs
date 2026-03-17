@@ -6,7 +6,7 @@ using System;
 namespace LegoBluetooth
 {
     /// <summary>
-    /// Represents a message to set up the mode of operation for the LPF2 Device connected to the addressed Port.
+    /// Represents a 0x41 message to set up the mode of operation for the LPF2 Device connected to the addressed Port.
     /// </summary>
     public class PortInputFormatSetupSingleMessage : CommonMessageHeader
     {

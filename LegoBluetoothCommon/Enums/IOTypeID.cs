@@ -84,6 +84,81 @@ namespace LegoBluetooth
         InternalTilt = 0x0028,
 
         /// <summary>
+        /// Duplo Train Base Motor.
+        /// </summary>
+        DuploTrainBaseMotor = 0x0029,
+
+        /// <summary>
+        /// Duplo Train Base Speaker.
+        /// </summary>
+        DuploTrainBaseSpeaker = 0x002A,
+
+        /// <summary>
+        /// Duplo Train Base Color Sensor.
+        /// </summary>
+        DuploTrainBaseColorSensor = 0x002B,
+
+        /// <summary>
+        /// Duplo Train Base Speedometer.
+        /// </summary>
+        DuploTrainBaseSpeedometer = 0x002C,
+
+        /// <summary>
+        /// Technic Large Linear Motor.
+        /// </summary>
+        TechnicLargeLinearMotor = 0x002E,
+
+        /// <summary>
+        /// Technic Medium Hub Gesture Sensor.
+        /// </summary>
+        TechnicMediumHubGestureSensor = 0x0036,
+
+        /// <summary>
+        /// Technic Medium Hub Accelerometer.
+        /// </summary>
+        TechnicMediumHubAccelerometer = 0x0039,
+
+        /// <summary>
+        /// Technic Medium Hub Gyro Sensor.
+        /// </summary>
+        TechnicMediumHubGyroSensor = 0x003A,
+
+        /// <summary>
+        /// Technic Medium Hub Tilt Sensor.
+        /// </summary>
+        TechnicMediumHubTiltSensor = 0x003B,
+
+        /// <summary>
+        /// Technic Medium Hub Temperature Sensor.
+        /// </summary>
+        TechnicMediumHubTemperatureSensor = 0x003C,
+
+        /// <summary>
+        /// Unknown sensor (MoveHub port 0x46).
+        /// </summary>
+        Hub42 = 0x0042,
+
+        /// <summary>
+        /// Mario Hub Debug.
+        /// </summary>
+        MarioHubDebug = 0x0046,
+
+        /// <summary>
+        /// Mario Hub Accelerometer.
+        /// </summary>
+        MarioHubAccelerometer = 0x0047,
+
+        /// <summary>
+        /// Mario Hub Tag Sensor.
+        /// </summary>
+        MarioHubTagSensor = 0x0049,
+
+        /// <summary>
+        /// Mario Hub Pants.
+        /// </summary>
+        MarioHubPants = 0x004A,
+
+        /// <summary>
         /// Used for unkonw devices with a default configuration.
         /// </summary>
         Other = 0xFFFF

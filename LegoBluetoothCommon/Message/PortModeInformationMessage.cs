@@ -7,7 +7,7 @@ using System.Text;
 namespace LegoBluetooth
 {
     /// <summary>
-    /// Represents a message that returns specified Mode Information Types about the LPF2 device connected to the Port.
+    /// Represents a 0x44 message that returns specified Mode Information Types about the LPF2 device connected to the Port.
     /// </summary>
     public class PortModeInformationMessage : CommonMessageHeader
     {
@@ -176,9 +176,10 @@ namespace LegoBluetooth
             switch (ModeInformationType)
             {
                 case ModeInformationType.Name:
-                    Length = (ushort)(6 + Name.Length);
+                    Length = 17;
                     data = new byte[Length];
-                    Array.Copy(Encoding.UTF8.GetBytes(Name), 0, data, 6, Name.Length);
+                    var nameBytes = Encoding.UTF8.GetBytes(Name);
+                    Array.Copy(nameBytes, 0, data, 6, nameBytes.Length > 11 ? 11 : nameBytes.Length);
                     break;
                 case ModeInformationType.Raw:
                     Length = 14;
@@ -199,9 +200,10 @@ namespace LegoBluetooth
                     Array.Copy(BitConverter.GetBytes(SiMax), 0, data, 10, 4);
                     break;
                 case ModeInformationType.Symbol:
-                    Length = (ushort)(6 + Symbol.Length); ;
+                    Length = 11;
                     data = new byte[Length];
-                    Array.Copy(Encoding.UTF8.GetBytes(Symbol), 0, data, 6, Symbol.Length);
+                    var symbolBytes = Encoding.UTF8.GetBytes(Symbol);
+                    Array.Copy(symbolBytes, 0, data, 6, symbolBytes.Length > 5 ? 5 : symbolBytes.Length);
                     break;
                 case ModeInformationType.Mapping:
                     Length = 8;

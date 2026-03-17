@@ -7,7 +7,7 @@ using System.Collections;
 namespace LegoBluetooth
 {
     /// <summary>
-    /// Represents a message that updates the host with addressed LPF2 Device data.
+    /// Represents a 0x45 message that updates the host with addressed LPF2 Device data.
     /// </summary>
     public class PortValueSingleMessage : CommonMessageHeader
     {
@@ -28,6 +28,11 @@ namespace LegoBluetooth
         }
 
         /// <summary>
+        /// Gets or sets the payload of the message as the value depends of the mode, it cannot be decoded right away.
+        /// </summary>
+        public byte[] Payload { get; set; }
+
+        /// <summary>
         /// Decodes a byte array to create a <see cref="PortValueSingleMessage"/> instance.
         /// </summary>
         /// <param name="data">The byte array containing the message data.</param>
@@ -39,46 +44,30 @@ namespace LegoBluetooth
                 throw new ArgumentException("Invalid data array. Must contain at least 5 bytes.", nameof(data));
             }
 
-            var message = new PortValueSingleMessage(data[1])
+            ushort length;
+            int index;
+            if ((data[0] & 0x80) == 0x80)
+            {
+                length = (ushort)((data[0] & 0x7F) | (data[1] << 7));
+                index = 2;
+            }
+            else
+            {
+                length = data[0];
+                index = 1;
+            }
+
+            var message = new PortValueSingleMessage(data[index])
             {
                 Message = data,
+                Length = length,
             };
 
-            // TODO: fix all this, this is not working properly
-            int index = 3;
-            while (index < data.Length)
-            {
-                byte portID = data[index++];
-                byte valueType = data[index++];
+            // Skip hubID and messageType
+            index += 2;
 
-                object inputValue;
-                switch (valueType)
-                {
-                    case 0x00: // 8 bit
-                        inputValue = data[index++];
-                        break;
-                    case 0x01: // 16 bit
-                        inputValue = BitConverter.ToUInt16(data, index);
-                        index += 2;
-                        break;
-                    case 0x02: // 32 bit
-                        inputValue = BitConverter.ToUInt32(data, index);
-                        index += 4;
-                        break;
-                    case 0x03: // FLOAT
-                        inputValue = BitConverter.ToSingle(data, index);
-                        index += 4;
-                        break;
-                    default:
-                        throw new ArgumentException("Invalid value type.", nameof(data));
-                }
-
-                message.PortValues.Add(new PortValueEntry
-                {
-                    PortID = portID,
-                    InputValue = inputValue
-                });
-            }
+            message.Payload = new byte[data.Length - index];
+            Array.Copy(data, index, message.Payload, 0, message.Payload.Length);
 
             return message;
         }
@@ -98,24 +87,29 @@ namespace LegoBluetooth
             data.Add((byte)MessageType);
             length++;
 
-            foreach (PortValueEntry portValue in PortValues)
+            // If Payload is set directly, use it as raw data (port + value bytes)
+            if (Payload != null && Payload.Length > 0 && PortValues.Count == 0)
             {
-                data.Add(portValue.PortID);
+                foreach (byte b in Payload)
+                {
+                    data.Add(b);
+                    length++;
+                }
+            }
+            else
+            {
+                foreach (PortValueEntry portValue in PortValues)
+            {
+                data.Add((byte)portValue.PortID);
                 length++;
 
                 switch (portValue.InputValue)
                 {
                     case byte value8:
-                        // 8 bit
-                        data.Add(0x00);
-                        length++;
                         data.Add(value8);
                         length++;
                         break;
                     case ushort value16:
-                        // 16 bit
-                        data.Add(0x01);
-                        length++;
                         foreach (byte b in BitConverter.GetBytes(value16))
                         {
                             data.Add(b);
@@ -124,9 +118,6 @@ namespace LegoBluetooth
 
                         break;
                     case uint value32:
-                        // 32 bit
-                        data.Add(0x02);
-                        length++;
                         foreach (byte b in BitConverter.GetBytes(value32))
                         {
                             data.Add(b);
@@ -135,9 +126,6 @@ namespace LegoBluetooth
 
                         break;
                     case float valueFloat:
-                        // FLOAT
-                        data.Add(0x03);
-                        length++;
                         foreach (byte b in BitConverter.GetBytes(valueFloat))
                         {
                             data.Add(b);
@@ -148,19 +136,22 @@ namespace LegoBluetooth
                     default:
                         throw new ArgumentException("Invalid input value type.", nameof(portValue.InputValue));
                 }
+                }
             }
 
-            Length = (ushort)length;
             // Compute properly the length
             if (length > 127)
             {
-                data.Insert(0, (byte)((length >> 8) | 0x80));
-                data.Insert(1, (byte)(length & 0xFF));
+                length += 1; // Account for 2-byte length header
+                data.Insert(0, (byte)((length & 0x7F) | 0x80));
+                data.Insert(1, (byte)(length >> 7));
             }
             else
             {
                 data.Insert(0, (byte)length);
             }
+
+            Length = (ushort)length;
 
             return (byte[])data.ToArray(typeof(byte));
         }
@@ -172,13 +163,21 @@ namespace LegoBluetooth
         public override string ToString()
         {
             string portValuesString = string.Empty;
-            foreach (PortValueEntry portValue in PortValues)
+            if (PortValues != null)
             {
-                if (portValuesString.Length > 0)
+                foreach (PortValueEntry portValue in PortValues)
                 {
-                    portValuesString += ", ";
+                    if (portValuesString.Length > 0)
+                    {
+                        portValuesString += ", ";
+                    }
+                    portValuesString += $"PortID: {portValue.PortID}, InputValue: {portValue.InputValue}";
                 }
-                portValuesString += $"PortID: {portValue.PortID}, InputValue: {portValue.InputValue}";
+            }
+
+            if (Payload != null)
+            {
+                portValuesString += $", Payload: {BitConverter.ToString(Payload)}";
             }
 
             return $"{base.ToString()}, PortValues: [{portValuesString}]";

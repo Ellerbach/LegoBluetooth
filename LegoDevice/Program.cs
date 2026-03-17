@@ -14,10 +14,14 @@ namespace LegoBluetoothHub
         {
             BluetoothNano bluetooth = new BluetoothNano();
 
-            var hub = new MoveHub(bluetooth);
-            hub.FWVersion = new Version(1, 0, 0, 0);
-            hub.HWVersion = new Version(1, 0, 0, 0);
-            hub.Name = "Move Hub";
+            // Uncomment the hub you want to emulate:
+            //var hub = CreateMoveHub(bluetooth);
+            //var hub = CreateTwoPortHub(bluetooth);
+            //var hub = CreateTechnicMediumHub(bluetooth);
+            var hub = CreateDuploTrainBaseHub(bluetooth);
+            //var hub = CreateMarioHub(bluetooth);
+
+            hub.OnPortOutputCommand += HubOnPortOutputCommand;
 
             bluetooth.OnError += BluetoothOnError;
             bluetooth.ProcessIncoming = hub.ProcessReceived;
@@ -35,9 +39,39 @@ namespace LegoBluetoothHub
             Thread.Sleep(Timeout.Infinite);
         }
 
+        private static MoveHub CreateMoveHub(BluetoothNano bluetooth)
+        {
+            return new MoveHub(bluetooth);
+        }
+
+        private static TwoPortHub CreateTwoPortHub(BluetoothNano bluetooth)
+        {
+            return new TwoPortHub(bluetooth);
+        }
+
+        private static TechnicMediumHub CreateTechnicMediumHub(BluetoothNano bluetooth)
+        {
+            return new TechnicMediumHub(bluetooth);
+        }
+
+        private static DuploTrainBaseHub CreateDuploTrainBaseHub(BluetoothNano bluetooth)
+        {
+            return new DuploTrainBaseHub(bluetooth);
+        }
+
+        private static MarioHub CreateMarioHub(BluetoothNano bluetooth)
+        {
+            return new MarioHub(bluetooth);
+        }
+
         private static void BluetoothOnError(StatusError error)
         {
             Debug.WriteLine($"BLE error: {error}");
+        }
+
+        private static void HubOnPortOutputCommand(PortOutputCommandMessage msg)
+        {
+            Debug.WriteLine($"Motor command: Port={msg.PortID}, SubCommand={msg.SubCommand}, Payload={BitConverter.ToString(msg.Payload)}");
         }
     }
 }

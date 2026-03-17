@@ -6,7 +6,7 @@ using System;
 namespace LegoBluetooth
 {
     /// <summary>
-    /// Represents a generic error message from the Hub.
+    /// Represents a generic error 0x05 message from the Hub.
     /// </summary>
     public class ErrorMessage : CommonMessageHeader
     {

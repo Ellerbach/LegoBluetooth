@@ -6,7 +6,7 @@ using System;
 namespace LegoBluetooth
 {
     /// <summary>
-    /// Represents a Hub Property Message which includes the common message header and additional properties.
+    /// Represents a Hub Property 0x01 Message which includes the common message header and additional properties.
     /// </summary>
     public class HubPropertyMessage : CommonMessageHeader
     {
@@ -71,7 +71,7 @@ namespace LegoBluetooth
                 {
                     throw new ArgumentException("Invalid data array. Must contain at least 6 bytes for extended length encoding.", nameof(data));
                 }
-                length = (ushort)(((data[0] & 0x7F) << 8) | data[1]);
+                length = (ushort)((data[0] & 0x7F) | (data[1] << 7));
                 index = 2;
             }
             else
@@ -85,10 +85,11 @@ namespace LegoBluetooth
             HubProperty property = (HubProperty)data[index++];
             HubPropertyOperation operation = (HubPropertyOperation)data[index++];
 
-            byte[] payload = new byte[length - 5];
-            if (payload.Length > 0)
+            int payloadLength = length - index;
+            byte[] payload = new byte[payloadLength];
+            if (payloadLength > 0)
             {
-                Array.Copy(data, index, payload, 0, length - 5);
+                Array.Copy(data, index, payload, 0, payloadLength);
             }
 
             return new HubPropertyMessage(hubID, property, operation, payload)
@@ -109,16 +110,17 @@ namespace LegoBluetooth
 
             Length = (Payload != null) ? (ushort)(5 + Payload.Length) : (ushort)5;
 
-            if (Length < 127)
+            if (Length <= 127)
             {
                 data = new byte[Length];
                 data[index++] = (byte)Length;
             }
             else
             {
-                data = new byte[Length + 1];
-                data[index++] = (byte)((Length >> 8) | 0x80);
-                data[index++] = (byte)(Length & 0xFF);
+                Length += 1; // Account for 2-byte length header
+                data = new byte[Length];
+                data[index++] = (byte)((Length & 0x7F) | 0x80);
+                data[index++] = (byte)(Length >> 7);
             }
 
             data[index++] = HubID;

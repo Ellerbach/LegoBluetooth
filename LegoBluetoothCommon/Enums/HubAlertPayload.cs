@@ -5,14 +5,10 @@ namespace LegoBluetooth
 {
     /// <summary>
     /// Represents the payload of a Hub alert message in the upstream direction.
+    /// Only present when AlertOperation is Update (upstream).
     /// </summary>
     public enum HubAlertPayload : byte
     {
-        /// <summary>
-        /// Used not to send the status when creating a downstream class.
-        /// </summary>
-        NoStatus = 0x01,
-
         /// <summary>
         /// Status OK.
         /// </summary>

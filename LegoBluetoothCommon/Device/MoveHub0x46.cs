@@ -20,7 +20,7 @@ namespace LegoBluetooth.Device
         public MoveHub0x46(IBluetooth ble, byte hubID, byte portID) : base(ble, hubID, portID)
         {
             // Unknown device type
-            DeviceType = IOTypeID.Other;
+            DeviceType = IOTypeID.Hub42;
             HWVersion = new Version(0, 0, 0, 1);
             SWVersion = new Version(1, 0, 0, 0);
         }

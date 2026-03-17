@@ -6,7 +6,7 @@ using System;
 namespace LegoBluetooth
 {
     /// <summary>
-    /// Represents a message for subscribing to Hub alerts and requesting the current state of these alerts.
+    /// Represents a 0x04 message for subscribing to Hub alerts and requesting the current state of these alerts.
     /// </summary>
     public class HubAlertMessage : CommonMessageHeader
     {
@@ -30,9 +30,9 @@ namespace LegoBluetooth
         /// Gets or sets the alert payload.
         /// </summary>
         /// <remarks>
-        /// The payload of the alert message in the upstream direction.
+        /// The payload of the alert message. Only included on the wire when AlertOperation is Update (upstream).
         /// </remarks>
-        public HubAlertPayload AlertPayload { get; set; } = HubAlertPayload.NoStatus;
+        public HubAlertPayload AlertPayload { get; set; } = HubAlertPayload.StatusOK;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HubAlertMessage"/> class.
@@ -48,7 +48,7 @@ namespace LegoBluetooth
             AlertType = alertType;
             AlertOperation = alertOperation;
             AlertPayload = alertPayload;
-            Length = (ushort)(5 + (AlertPayload != HubAlertPayload.NoStatus ? 1 : 0));
+            Length = (ushort)(AlertOperation == HubAlertOperation.Update ? 6 : 5);
         }
 
         /// <summary>
@@ -65,9 +65,9 @@ namespace LegoBluetooth
 
             HubAlertType alertType = (HubAlertType)data[3];
             HubAlertOperation alertOperation = (HubAlertOperation)data[4];
-            // In theory, we don't have any alert downstream.
-            HubAlertPayload alertPayload = HubAlertPayload.NoStatus;
-            if (data.Length > 5)
+            // Payload is only present in upstream (Update) messages
+            HubAlertPayload alertPayload = HubAlertPayload.StatusOK;
+            if (alertOperation == HubAlertOperation.Update && data.Length > 5)
             {
                 alertPayload = (HubAlertPayload)data[5];
             }
@@ -85,7 +85,7 @@ namespace LegoBluetooth
         /// <returns>A byte array representing the HubAlertMessage.</returns>
         public override byte[] ToByteArray()
         {
-            Length = AlertPayload == HubAlertPayload.NoStatus ? (ushort)5 : (ushort)6;
+            Length = AlertOperation == HubAlertOperation.Update ? (ushort)6 : (ushort)5;
             byte[] data = new byte[Length];
             int index = 0;
 
@@ -94,7 +94,7 @@ namespace LegoBluetooth
             data[index++] = (byte)MessageType;
             data[index++] = (byte)AlertType;
             data[index++] = (byte)AlertOperation;
-            if (AlertPayload != HubAlertPayload.NoStatus)
+            if (AlertOperation == HubAlertOperation.Update)
             {
                 data[index++] = (byte)AlertPayload;
             }

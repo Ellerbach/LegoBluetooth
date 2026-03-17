@@ -2,112 +2,86 @@
 // Laurent Ellerbach licenses this file to you under the MIT license.
 
 /// <summary>
-/// Represents the sub-command types for the port output command.
+/// Represents the sub-command types for the port output command (0x81).
+/// Only values that correspond to actual protocol sub-command bytes are included.
+/// Commands encoded via WriteDirect (0x50) or WriteDirectModeData (0x51) use
+/// those sub-commands with a mode byte, not their own sub-command value.
 /// </summary>
 public enum SubCommandType : byte
 {
     /// <summary>
-    /// Start power with a single power value.
+    /// Start power with a single power value (sub-command 0x01).
     /// </summary>
-    StartPower = 0x00,
+    StartPower = 0x01,
 
     /// <summary>
-    /// Start power with two power values.
+    /// Start power with two power values (sub-command 0x02).
     /// </summary>
     StartPowerDual = 0x02,
 
     /// <summary>
-    /// Set acceleration time.
+    /// Set acceleration time (sub-command 0x05).
     /// </summary>
     SetAccTime = 0x05,
 
     /// <summary>
-    /// Set deceleration time.
+    /// Set deceleration time (sub-command 0x06).
     /// </summary>
     SetDecTime = 0x06,
 
     /// <summary>
-    /// Start speed with a single speed value.
+    /// Start speed with a single speed value (sub-command 0x07).
     /// </summary>
     StartSpeed = 0x07,
 
     /// <summary>
-    /// Start speed with two speed values.
+    /// Start speed with two speed values (sub-command 0x08).
     /// </summary>
     StartSpeedDual = 0x08,
 
     /// <summary>
-    /// Start speed for a specified time.
+    /// Start speed for a specified time (sub-command 0x09).
     /// </summary>
     StartSpeedForTime = 0x09,
 
     /// <summary>
-    /// Start speed for a specified time with two speed values.
+    /// Start speed for a specified time with two speed values (sub-command 0x0A).
     /// </summary>
     StartSpeedForTimeDual = 0x0A,
 
     /// <summary>
-    /// Start speed for a specified number of degrees.
+    /// Start speed for a specified number of degrees (sub-command 0x0B).
     /// </summary>
     StartSpeedForDegrees = 0x0B,
 
     /// <summary>
-    /// Start speed for a specified number of degrees with two speed values.
+    /// Start speed for a specified number of degrees with two speed values (sub-command 0x0C).
     /// </summary>
     StartSpeedForDegreesDual = 0x0C,
 
     /// <summary>
-    /// Go to an absolute position.
+    /// Go to an absolute position (sub-command 0x0D).
     /// </summary>
     GotoAbsolutePosition = 0x0D,
 
     /// <summary>
-    /// Go to absolute positions with two position values.
+    /// Go to absolute positions with two position values (sub-command 0x0E).
     /// </summary>
     GotoAbsolutePositionDual = 0x0E,
 
     /// <summary>
-    /// Preset the encoder to a specified position.
+    /// Preset encoder for two motors (sub-command 0x14).
+    /// Single-motor PresetEncoder uses WriteDirectModeData (0x51).
     /// </summary>
     PresetEncoder = 0x14,
 
     /// <summary>
-    /// Preset the encoder to specified positions for two encoders.
+    /// Write direct data to a port (sub-command 0x50).
     /// </summary>
-    PresetEncoderDual = 0x14,
+    WriteDirect = 0x50,
 
     /// <summary>
-    /// Preset the tilt impact.
+    /// Write direct mode data to a port (sub-command 0x51).
     /// </summary>
-    TiltImpactPreset = 0x15,
-
-    /// <summary>
-    /// Configure the tilt orientation.
-    /// </summary>
-    TiltConfigOrientation = 0x16,
-
-    /// <summary>
-    /// Configure the tilt impact.
-    /// </summary>
-    TiltConfigImpact = 0x17,
-
-    /// <summary>
-    /// Perform a factory calibration for tilt.
-    /// </summary>
-    TiltFactoryCalibration = 0x18,
-
-    /// <summary>
-    /// Perform a hardware reset.
-    /// </summary>
-    HardwareReset = 0x19,
-
-    /// <summary>
-    /// Set the RGB color by color number.
-    /// </summary>
-    SetRgbColorNo = 0x1A,
-
-    /// <summary>
-    /// Set the RGB color by individual RGB values.
-    /// </summary>
-    SetRgbColors = 0x1B
+    WriteDirectModeData = 0x51,
 }

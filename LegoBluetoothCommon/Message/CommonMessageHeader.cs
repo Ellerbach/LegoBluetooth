@@ -74,7 +74,7 @@ namespace LegoBluetooth
                 {
                     throw new ArgumentException("Invalid data array. Must contain at least 4 bytes for extended length encoding.", nameof(data));
                 }
-                length = (ushort)(((data[0] & 0x7F) << 8) | data[1]);
+                length = (ushort)((data[0] & 0x7F) | (data[1] << 7));
                 index = 2;
             }
             else

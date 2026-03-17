@@ -26,6 +26,11 @@ namespace LegoBluetooth
         /// <summary>
         /// LEGO System 2.
         /// </summary>
-        LegoSystem2 = 0b011
+        LegoSystem2 = 0b011,
+
+        /// <summary>
+        /// LEGO Technic.
+        /// </summary>
+        LegoTechnic = 0b100
     }
 }

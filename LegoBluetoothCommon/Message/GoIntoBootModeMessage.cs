@@ -7,7 +7,7 @@ using System.Text;
 namespace LegoBluetooth
 {
     /// <summary>
-    /// Represents a message to trigger the Hub to go into boot mode for firmware update.
+    /// Represents a message to trigger the Hub to go into boot mode for firmware update 0x10.
     /// </summary>
     public class GoIntoBootModeMessage : CommonMessageHeader
     {

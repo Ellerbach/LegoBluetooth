@@ -7,7 +7,7 @@ using System.Diagnostics;
 namespace LegoBluetooth
 {
     /// <summary>
-    /// Represents a message for subscribing to Hub alerts and requesting the current state of these alerts.
+    /// Represents a 0x04 message for Hub Attached I/O notifications.
     /// </summary>
     public class HubAttachedIOMessage : CommonMessageHeader
     {
@@ -175,9 +175,6 @@ namespace LegoBluetooth
             {
                 Array.Copy(BitConverter.GetBytes((ushort)IOTypeID), 0, data, index, 2);
                 index += 2;
-                Debug.WriteLine($"HardwareRevision: {HardwareRevision.Major}.{HardwareRevision.Minor}.{HardwareRevision.Build}.{HardwareRevision.Revision}");
-                Debug.WriteLine($"Encoded: {VersionNumberEncoder.Encode(HardwareRevision)}");
-                Debug.WriteLine($"Bytes: {BitConverter.ToString(BitConverter.GetBytes(VersionNumberEncoder.Encode(HardwareRevision)))}");
                 Array.Copy(BitConverter.GetBytes(VersionNumberEncoder.Encode(HardwareRevision)), 0, data, index, 4);
                 index += 4;
                 Array.Copy(BitConverter.GetBytes(VersionNumberEncoder.Encode(SoftwareRevision)), 0, data, index, 4);

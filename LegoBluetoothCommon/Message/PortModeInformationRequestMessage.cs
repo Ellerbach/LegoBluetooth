@@ -6,7 +6,7 @@ using System;
 namespace LegoBluetooth
 {
     /// <summary>
-    /// Represents a message to request information about the different modes of the LPF2 Device connected to the port.
+    /// Represents a 0x22 message to request information about the different modes of the LPF2 Device connected to the port.
     /// </summary>
     public class PortModeInformationRequestMessage : CommonMessageHeader
     {
