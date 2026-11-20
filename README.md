@@ -22,6 +22,7 @@ The solution is organized as follows:
 |---|---|
 | **LegoBluetoothCommon** | Shared project containing all protocol messages, enums, device classes, and hub implementations. Referenced by both nanoFramework and .NET projects. |
 | **LegoBluetooth** | nanoFramework library providing the `BluetoothNano` BLE implementation. |
+| **LegoBluetoothDotnet** | .NET Standard 2.0 protocol library, packaged as `LegoBluetooth.Common`. |
 | **LegoDevice** | nanoFramework application that runs the hub emulator on an ESP32. |
 | **DumpPayloads** | nanoFramework utility to scan and dump raw BLE payloads from real LEGO hubs. |
 | **DotnetLegoBluetoothTest** | .NET 8.0 unit tests (143 tests) covering all message types. |
@@ -140,7 +141,7 @@ On nanoFramework targets, the emulator periodically calls `nanoFramework.Runtime
 
 ## Usage for .NET
 
-The protocol message classes in `LegoBluetoothCommon` can be used in any .NET application to encode and decode LEGO BLE protocol messages. The shared project is referenced by the .NET test project, demonstrating full protocol compatibility.
+The protocol message classes in `LegoBluetoothCommon` can be used in any .NET application to encode and decode LEGO BLE protocol messages. The .NET Standard 2.0 library in `LegoBluetoothDotnet` packages these classes as `LegoBluetooth.Common`. Both the decoder and .NET tests reference this library.
 
 ### Decoding messages
 
@@ -159,6 +160,46 @@ The `DotnetLegoBluetoothTest` project contains 143 unit tests covering all messa
 ```
 dotnet test DotnetLegoBluetoothTest/DotnetLegoBluetoothTest.csproj
 ```
+
+## CI/CD and NuGet releases
+
+[GitHub Actions](./.github/workflows/ci.yml) builds every .NET and nanoFramework project in Release mode on Windows, runs the .NET tests and dependency-updater checks, and uploads NuGet packages and TRX test results. nanoFramework tests are compiled, but running them still requires a device or emulator.
+
+Two packages are produced:
+
+| Package | Contents |
+|---|---|
+| `LegoBluetooth.Common` | .NET Standard 2.0 protocol, device and hub classes. |
+| `nanoFramework.LegoBluetooth` | Protocol classes and the nanoFramework Bluetooth transport, including deployment `.pe` and `.pdbx` files. |
+
+Branch and pull-request builds create downloadable `1.0.0-ci.<run number>` packages, without publishing them. To publish a release:
+
+1. Add an Actions secret named `NUGET_API_KEY` containing a NuGet.org API key authorized to push both package IDs. The package IDs must be available to your account.
+2. Create the `nuget` GitHub environment; configure required reviewers if releases should need approval. The API key can be a repository secret or an environment secret.
+3. Push a version tag such as `v1.0.0` or `v1.1.0-preview.1`. CI builds and tests that commit, packages both libraries with the tag version, and publishes them to NuGet.org only after the build succeeds. Re-running a release skips already published versions.
+
+Local packaging after a Release build (Visual Studio with nanoFramework build components, .NET SDK, and `nuget.exe` on `PATH` are required):
+
+```powershell
+dotnet pack .\LegoBluetoothDotnet\LegoBluetoothDotnet.csproj --configuration Release -p:PackageVersion=1.0.0 --output .\artifacts\packages
+.\.github\scripts\Pack-NanoFramework.ps1 -Version 1.0.0
+```
+
+### Dependency updates
+
+[Dependabot](./.github/dependabot.yml) opens weekly grouped updates for standard .NET NuGet dependencies and GitHub Actions. nanoFramework `.nfproj` projects are not supported by Dependabot, so a [separate weekly workflow](./.github/workflows/dependencies.yml) updates their stable NuGet versions and matching assembly reference paths together.
+
+For the nanoFramework updater, add a repository Actions secret named `DEPENDENCY_UPDATE_TOKEN`: a fine-grained personal access token with access to this repository and **Contents: read/write** and **Pull requests: read/write** permissions. A separate token is needed because pull requests created with the default `GITHUB_TOKEN` do not trigger CI. Ensure repository Actions policy permits pull-request creation. The workflow can also be run manually from the Actions tab.
+
+Dependency PRs are not automatically merged. Review build results and nanoFramework firmware/native assembly compatibility before merging; major updates or new transitive dependencies may require manual migration. Package metadata is generated from the library's `packages.config`, so release dependencies stay synchronized.
+
+Run the nanoFramework updater locally with:
+
+```powershell
+.\.github\scripts\Update-NanoFrameworkDependencies.ps1
+```
+
+The decoder currently targets the out-of-support .NET 7 runtime; CI installs its SDK explicitly without changing the application's target framework.
 
 ## Completed work
 

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>LegoBluetooth.Common</AssemblyName>
+    <RootNamespace>LegoBluetooth</RootNamespace>
+    <PackageId>LegoBluetooth.Common</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Laurent Ellerbach</Authors>
+    <Description>LEGO Bluetooth Low Energy protocol messages, devices, and hub implementations for .NET.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/Ellerbach/LegoBluetooth</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>LEGO;Bluetooth;BLE</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  <Import Project="..\LegoBluetoothCommon\LegoBluetoothCommon.projitems" Label="Shared" />
+</Project>

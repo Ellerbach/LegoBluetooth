@@ -7,7 +7,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <Import Project="..\LegoBluetoothCommon\LegoBluetoothCommon.projitems" Label="Shared" />
+  <ItemGroup>
+    <ProjectReference Include="..\LegoBluetoothDotnet\LegoBluetoothDotnet.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Update="BasicConnectionWithAlerts.txt">

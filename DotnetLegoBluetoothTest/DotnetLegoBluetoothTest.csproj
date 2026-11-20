@@ -18,6 +18,8 @@
 
   <Import Project="..\CommonLegoBluetoothTest\CommonLegoBluetoothTest.projitems" Label="Shared" />
 
-  <Import Project="..\LegoBluetoothCommon\LEgoBluetoothCommon.projitems" Label="Shared" />
+  <ItemGroup>
+    <ProjectReference Include="..\LegoBluetoothDotnet\LegoBluetoothDotnet.csproj" />
+  </ItemGroup>
 
 </Project>
