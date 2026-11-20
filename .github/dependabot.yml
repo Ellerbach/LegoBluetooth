@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directories:
+      - /DecoderHelper
+      - /DotnetLegoBluetoothTest
+      - /LegoBluetoothDotnet
+    schedule:
+      interval: weekly
+    groups:
+      dotnet:
+        patterns:
+          - "*"
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns:
+          - "*"

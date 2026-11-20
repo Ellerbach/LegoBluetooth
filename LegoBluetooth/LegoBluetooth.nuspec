@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>nanoFramework.LegoBluetooth</id>
+    <version>1.0.0</version>
+    <authors>Laurent Ellerbach</authors>
+    <description>LEGO Bluetooth Low Energy protocol and Bluetooth transport for .NET nanoFramework.</description>
+    <license type="expression">MIT</license>
+    <readme>README.md</readme>
+    <projectUrl>https://github.com/Ellerbach/LegoBluetooth</projectUrl>
+    <repository type="git" url="https://github.com/Ellerbach/LegoBluetooth" />
+    <tags>nanoFramework LEGO Bluetooth BLE</tags>
+    <dependencies />
+  </metadata>
+  <files>
+    <file src="bin\Release\LegoBluetooth_lib.dll" target="lib" />
+    <file src="bin\Release\LegoBluetooth_lib.pe" target="lib" />
+    <file src="bin\Release\LegoBluetooth_lib.pdbx" target="lib" />
+    <file src="bin\Release\LegoBluetooth_lib.pdb" target="lib" />
+    <file src="..\README.md" target="" />
+  </files>
+</package>
